@@ -32,10 +32,14 @@
         <div class="user-menu">
           <button class="user-button">
             <div class="user-avatar">
-              <span>UP</span>
+              <img 
+                src="/images/profile/user-avatar.png" 
+                alt="User Avatar"
+                class="user-avatar-img"
+              />
             </div>
             <div class="user-info">
-              <span class="user-name">User Polban</span>
+              <span class="user-name">Guest</span>
             </div>
             <img 
               src="/images/arrow-v.png"   
@@ -157,7 +161,7 @@ export default {
   padding: var(--space-2) var(--space-3);
   background: var(--color-primary-light);
   border: 0px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   color: var(--color-white);
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -174,12 +178,21 @@ export default {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-dark));
+  background: var(--color-gray-300);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   font-size: 0.675rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-avatar-img {
+  width: 60%;
+  height: 80%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .user-info {

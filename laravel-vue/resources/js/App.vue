@@ -1,20 +1,33 @@
 <template>
   <div id="app">
     <AppHeader @toggle-sidebar="handleToggleSidebar" />
+    <AppSidebar :isOpen="isSidebarOpen" />
+    <main class="main-content" :class="{ 'main-expanded': !isSidebarOpen }">
+      <div class="content-area">
+        <router-view />
+      </div>
+    </main>
   </div>
 </template>
 
 <script>
 import AppHeader from './components/Layout/AppHeader.vue'
+import AppSidebar from './components/Layout/AppSidebar.vue'
 
 export default {
   name: 'App',
   components: {
-    AppHeader
+    AppHeader,
+    AppSidebar
+  },
+  data() {
+    return {
+      isSidebarOpen: true
+    }
   },
   methods: {
     handleToggleSidebar() {
-      console.log('toggle sidebar di klik')
+      this.isSidebarOpen = !this.isSidebarOpen
     }
   }
 }
@@ -29,42 +42,32 @@ export default {
 .main-content {
   min-height: calc(100vh - 70px);
   margin-top: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-left: 280px;
+  transition: margin-left var(--transition-normal);
+}
+
+.main-expanded {
+  margin-left: 80px;
 }
 
 .content-area {
-  text-align: center;
-  padding: 2rem;
-  max-width: 600px;
+  padding: var(--space-6);
+  min-height: 100%;
 }
 
-.content-area h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--color-gray-900);
-  margin-bottom: 1rem;
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .main-expanded {
+    margin-left: 0;
+  }
 }
 
-.content-area p {
-  font-size: 1.125rem;
-  color: var(--color-gray-600);
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.test-section {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-gray-200);
-}
-
-.test-section p {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
+@media (max-width: 768px) {
+  .content-area {
+    padding: var(--space-4);
+  }
 }
 </style>

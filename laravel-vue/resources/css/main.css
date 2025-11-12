@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:wght@300;400;700&display=swap');
 
 :root {
-  --color-primary: #21308F;
+  --color-primary: #21308f;
   --color-primary-dark: #1b2876;
-  --color-primary-light: #3A4DC6;
+  --color-primary-light: #3a4dc6;
   --color-primary-hover: #3f53d4;
-  --color-secondary: #f59e0b;
-  --color-secondary-dark: #d97706;
+  --color-secondary: #f6983e;
+  --color-secondary-dark: #de8836;
   --color-white: #ffffff;
   --color-gray-50: #f8fafc;
   --color-gray-100: #f1f5f9;
@@ -31,6 +31,7 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+  --radius-2xl: 2rem;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
