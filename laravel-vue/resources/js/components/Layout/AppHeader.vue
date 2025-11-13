@@ -103,7 +103,7 @@ export default {
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-normal);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
 }
 
 .sidebar-toggle:hover {
@@ -125,7 +125,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
 }
 
 .logo-img {
@@ -142,8 +142,8 @@ export default {
 
 .logo-title {
   font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-white);
+  font-weight: 600;
+  color: var(--color-white);;
 }
 
 /* kanan */
@@ -165,13 +165,12 @@ export default {
   color: var(--color-white);
   cursor: pointer;
   transition: all var(--transition-normal);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
 }
 
 .user-button:hover {
   background: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(33,48,143,0.18);
 }
 
 .user-avatar {
@@ -203,8 +202,8 @@ export default {
 }
 
 .user-name {
-  font-size: 0.875rem;
-  font-family: 'Inria Sans', sans-serif;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 550;
 }
 
 .user-arrow {
@@ -229,15 +228,19 @@ export default {
   .header-right {
     gap: var(--space-4);
   }
-  
-  .user-info {
-    display: none;
-  }
 }
 
 @media (max-width: 480px) {
   .header-container {
     padding: 0 var(--space-3);
+  }
+
+  .logo-icon {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
   }
 }
 </style>

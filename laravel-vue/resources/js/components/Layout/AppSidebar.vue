@@ -106,7 +106,6 @@ export default {
   color: var(--color-gray-600);
   border-radius: var(--radius-2xl);
   transition: all var(--transition-normal);
-  font-weight: 500;
   position: relative;
   border: 1px solid transparent;
 }
@@ -120,8 +119,7 @@ export default {
 .nav-item--active {
   background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   color: var(--color-white);
-  border-color: var(--color-secondary);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
   padding: var(--space-2) var(--space-3);
 }
 
@@ -145,7 +143,7 @@ export default {
 
 .nav-text {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 550;
   transition: opacity var(--transition-normal);
   white-space: nowrap;
   flex: 1;
