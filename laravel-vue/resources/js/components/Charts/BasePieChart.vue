@@ -39,8 +39,31 @@ export default {
               font: {
                 size: 12,
                 family: 'Poppins, sans-serif'
-              }
+              },
+              boxWidth: 12,
+            },
+            onHover: (event, legendItem, legend) => {
+              event.native.target.style.cursor = 'pointer';
+            },
+            onLeave: (event, legendItem, legend) => {
+              event.native.target.style.cursor = 'default';
             }
+          },
+          tooltip: {
+            titleFont: {
+              size: 12,
+              weight: '500',
+              family: 'Poppins, sans-serif'
+            },
+            bodyFont: {
+              size: 11,
+              family: 'Poppins, sans-serif'
+            },
+            padding: 10,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            boxPadding: 6
           },
           title: {
             display: false
