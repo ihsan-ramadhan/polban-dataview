@@ -23,6 +23,7 @@
           </div>
           <div class="logo-text">
             <span class="logo-title">Polban Dataverse</span>
+            <span class="logo-subtitle">Satu Portal, Ribuan Cerita dalam Angka</span>
           </div>
         </div>
       </div>
@@ -72,7 +73,6 @@ export default {
   box-shadow: var(--shadow-lg);
   z-index: var(--z-fixed);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header-container {
@@ -93,11 +93,10 @@ export default {
 
 .sidebar-toggle {
   background: var(--color-primary-light);
-  border: 0px;
   color: var(--color-white);
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-lg);
+  width: 45px;
+  height: 45px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,7 +107,11 @@ export default {
 
 .sidebar-toggle:hover {
   background: var(--color-primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
+}
+
+.sidebar-toggle:active {
+  transform: translateY(0);
 }
 
 .logo {
@@ -118,19 +121,24 @@ export default {
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   background: var(--color-primary-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
+  transition: transform var(--transition-normal);
+}
+
+.logo-icon:hover {
+  transform: scale(1.05);
 }
 
 .logo-img {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
@@ -142,8 +150,15 @@ export default {
 
 .logo-title {
   font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--color-white);;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.logo-subtitle {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.02em;
 }
 
 /* kanan */
@@ -157,11 +172,10 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  height: 40px;
+  height: 45 px;
   padding: var(--space-2) var(--space-3);
   background: var(--color-primary-light);
-  border: 0px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   color: var(--color-white);
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -170,12 +184,17 @@ export default {
 
 .user-button:hover {
   background: var(--color-primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
+}
+
+.user-button:active {
+  transform: translateY(0);
 }
 
 .user-avatar {
-  width: 24px;
-  height: 24px;
+  position: relative;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--color-gray-300);
   display: flex;
@@ -185,13 +204,13 @@ export default {
   font-size: 0.675rem;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--shadow-lg);
 }
 
 .user-avatar-img {
   width: 60%;
   height: 80%;
   object-fit: cover;
-  border-radius: 50%;
 }
 
 .user-info {
@@ -234,8 +253,12 @@ export default {
   .header-container {
     padding: 0 var(--space-3);
   }
+  
+  .logo-title {
+    font-size: 1rem;
+  }
 
-  .logo-icon {
+  .logo-subtitle {
     display: none;
   }
 
