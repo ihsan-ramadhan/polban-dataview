@@ -149,8 +149,8 @@ export default {
 }
 
 .logo-title {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: var(--color-white);
 }
 

@@ -6,19 +6,22 @@
       <div class="content-area">
         <router-view />
       </div>
+      <AppFooter />
     </main>
   </div>
 </template>
 
 <script>
-import AppHeader from './components/Layout/AppHeader.vue'
-import AppSidebar from './components/Layout/AppSidebar.vue'
+import AppHeader from './components/Layout/AppHeader.vue';
+import AppSidebar from './components/Layout/AppSidebar.vue';
+import AppFooter from './components/Layout/AppFooter.vue';
 
 export default {
   name: 'App',
   components: {
     AppHeader,
-    AppSidebar
+    AppSidebar,
+    AppFooter
   },
   data() {
     return {
@@ -40,10 +43,12 @@ export default {
 }
 
 .main-content {
-  min-height: calc(100vh - 70px);
-  margin-top: 70px;
+  min-height: 100vh;
+  padding-top: 70px;
   margin-left: 280px;
   transition: margin-left var(--transition-normal);
+  display: flex;
+  flex-direction: column;
 }
 
 .main-expanded {
