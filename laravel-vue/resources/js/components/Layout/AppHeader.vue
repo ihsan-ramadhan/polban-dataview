@@ -172,7 +172,7 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  height: 45 px;
+  height: 45px;
   padding: var(--space-2) var(--space-3);
   background: var(--color-primary-light);
   border-radius: var(--radius-xl);
@@ -222,7 +222,7 @@ export default {
 
 .user-name {
   font-family: 'Poppins', sans-serif;
-  font-weight: 550;
+  font-weight: 600;
 }
 
 .user-arrow {
