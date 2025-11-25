@@ -30,6 +30,29 @@
 
       <!-- kanan -->
       <div class="header-right">
+        <button 
+          class="theme-toggle"
+          @click="toggleTheme"
+          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <transition name="theme-icon" mode="out-in">
+            <svg v-if="isDark" key="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="5" stroke-width="2"/>
+              <line x1="12" y1="1" x2="12" y2="3" stroke-width="2" stroke-linecap="round"/>
+              <line x1="12" y1="21" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2" stroke-linecap="round"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2" stroke-linecap="round"/>
+              <line x1="1" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round"/>
+              <line x1="21" y1="12" x2="23" y2="12" stroke-width="2" stroke-linecap="round"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2" stroke-linecap="round"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg v-else key="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </transition>
+        </button>
+
         <div class="user-menu">
           <button class="user-button">
             <div class="user-avatar">
@@ -57,7 +80,33 @@
 <script>
 export default {
   name: 'AppHeader',
-  emits: ['toggle-sidebar']
+  emits: ['toggle-sidebar'],
+  data() {
+    return {
+      isDark: false
+    }
+  },
+  mounted() {
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    
+    this.isDark = savedTheme === 'dark' || (!savedTheme && prefersDark)
+    this.applyTheme()
+  },
+  methods: {
+    toggleTheme() {
+      this.isDark = !this.isDark
+      this.applyTheme()
+      localStorage.setItem('theme', this.isDark ? 'dark' : 'light')
+    },
+    applyTheme() {
+      if (this.isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark')
+      } else {
+        document.documentElement.removeAttribute('data-theme')
+      }
+    }
+  }
 }
 </script>
 
@@ -69,10 +118,16 @@ export default {
   right: 0;
   height: 70px;
   background: var(--color-primary);
+  border-bottom: 1px solid var(--border-color);
   color: var(--color-white);
   box-shadow: var(--shadow-lg);
   z-index: var(--z-fixed);
   backdrop-filter: blur(10px);
+  transition: width var(--transition-normal), background-color 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .app-header {
+  background: var(--bg-secondary);
 }
 
 .header-container {
@@ -105,9 +160,17 @@ export default {
   box-shadow: var(--shadow-md);
 }
 
+[data-theme="dark"] .sidebar-toggle {
+  background: var(--hover-bg);
+}
+
 .sidebar-toggle:hover {
   background: var(--color-primary-hover);
   transform: translateY(-1.5px);
+}
+
+[data-theme="dark"] .sidebar-toggle:hover {
+  background: var(--color-gray-600);
 }
 
 .sidebar-toggle:active {
@@ -121,15 +184,21 @@ export default {
 }
 
 .logo-icon {
+  background: var(--color-primary-light);
+  color: var(--color-white);
   width: 45px;
   height: 45px;
-  background: var(--color-primary-light);
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
   box-shadow: var(--shadow-md);
-  transition: transform var(--transition-normal);
+}
+
+[data-theme="dark"] .logo-icon {
+  background: var(--hover-bg);
 }
 
 .logo-icon:hover {
@@ -139,7 +208,6 @@ export default {
 .logo-img {
   width: 32px;
   height: 32px;
-  object-fit: contain;
 }
 
 .logo-text {
@@ -165,7 +233,52 @@ export default {
 .header-right {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-4);
+}
+
+.theme-toggle {
+  background: var(--color-primary-light);
+  color: var(--color-white);
+  width: 45px;
+  height: 45px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--hover-bg);
+}
+
+.theme-toggle:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1.5px);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: var(--color-gray-600);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-toggle svg {
+  transition: opacity 0.2s ease;
+}
+
+.theme-icon-enter-active,
+.theme-icon-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.theme-icon-enter-from,
+.theme-icon-leave-to {
+  opacity: 0;
 }
 
 .user-button {
@@ -182,9 +295,17 @@ export default {
   box-shadow: var(--shadow-md);
 }
 
+[data-theme="dark"] .user-button {
+  background: var(--hover-bg);
+}
+
 .user-button:hover {
   background: var(--color-primary-hover);
   transform: translateY(-1.5px);
+}
+
+[data-theme="dark"] .user-button:hover {
+  background: var(--color-gray-600);
 }
 
 .user-button:active {
@@ -245,7 +366,7 @@ export default {
 
 @media (max-width: 768px) {
   .header-right {
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 }
 

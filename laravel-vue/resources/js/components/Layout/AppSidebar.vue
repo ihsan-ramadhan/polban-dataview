@@ -54,10 +54,10 @@ export default {
   left: 0;
   bottom: 0;
   width: 280px;
-  background: var(--color-white);
-  border-right: 1px solid var(--color-gray-200);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
   box-shadow: var(--shadow-md);
-  transition: width var(--transition-normal);
+  transition: width var(--transition-normal), background-color 0.3s ease, border-color 0.3s ease;
   z-index: var(--z-fixed);
   overflow: hidden;
 }
@@ -72,21 +72,7 @@ export default {
   flex-direction: column;
   padding: var(--space-4) 0;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-gray-300) transparent;
-}
-
-.sidebar-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--color-gray-300);
-  border-radius: 3px;
+  overflow-x: hidden;
 }
 
 .sidebar-nav {
@@ -107,7 +93,7 @@ export default {
 .nav-section-title {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--color-gray-500);
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0 var(--space-3);
@@ -129,18 +115,26 @@ export default {
   gap: var(--space-3);
   padding: var(--space-3);
   text-decoration: none;
-  color: var(--color-gray-700);
+  color: var(--text-secondary);
   border-radius: var(--radius-xl);
   transition: background var(--transition-normal), transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   position: relative;
   border: 1px solid transparent;
 }
 
+[data-theme="dark"] .nav-item {
+  color: var(--color-white);
+}
+
 .nav-item:hover {
-  background: var(--color-gray-50);
-  color: var(--color-gray-800);
+  background: var(--hover-bg);
+  color: var(--text-primary);
   transform: translateX(4px);
-  border-color: var(--color-gray-200);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-item:hover {
+  color: var(--color-white);
 }
 
 .nav-item--active {
@@ -167,8 +161,12 @@ export default {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-normal), filter 0.3s ease;
   filter: saturate(100%) invert(33%) sepia(9%) hue-rotate(190deg) brightness(96%) contrast(89%);
+}
+
+[data-theme="dark"] .nav-icon {
+  filter: invert(100%) brightness(100%);
 }
 
 .nav-icon--active {

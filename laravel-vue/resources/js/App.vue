@@ -39,16 +39,18 @@ export default {
 <style>
 #app {
   min-height: 100vh;
-  background: var(--color-gray-50);
+  background: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 .main-content {
   min-height: 100vh;
   padding-top: 70px;
   margin-left: 280px;
-  transition: margin-left var(--transition-normal);
+  transition: margin-left var(--transition-normal), background-color 0.3s ease;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
 }
 
 .main-expanded {
