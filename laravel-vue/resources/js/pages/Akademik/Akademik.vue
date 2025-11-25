@@ -5,15 +5,18 @@
 
     <div class="dashboard-grid">
       
+      <!-- Row 1: Dua card -->
       <div class="grid-item main-area">
         <TipeTesMasukCard />
       </div>
 
       <div class="grid-item side-area">
-        <div class="chart-card placeholder">
-          <h2>Chart Data Lain</h2>
-          <p>Coming Soon</p>
-        </div>
+        <RataNilaiCard />
+      </div>
+
+      <!-- Row 2: Satu card full width -->
+      <div class="grid-item full-width">
+        <TrenIPCard />
       </div>
 
     </div>
@@ -21,19 +24,21 @@
 </template>
 
 <script>
-// PENTING: Kita import komponen yang sudah ada filternya
 import TipeTesMasukCard from './TipeTesMasukCard.vue';
+import RataNilaiCard from './RataNilaiCard.vue';
+import TrenIPCard from './TrenIPCard.vue';
 
 export default {
   name: 'Akademik',
   components: {
-    TipeTesMasukCard
+    TipeTesMasukCard,
+    RataNilaiCard,
+    TrenIPCard
   }
 }
 </script>
 
 <style scoped>
-/* Layout Grid/Flexbox */
 .dashboard-grid {
   display: flex;
   flex-wrap: wrap;
@@ -45,21 +50,12 @@ export default {
   min-width: 300px;
 }
 
-/* Mengatur Lebar: Kiri lebih besar (2/3), Kanan lebih kecil (1/3) */
 .main-area { flex: 2; }
 .side-area { flex: 1; }
 
-/* Style Placeholder Simpel */
-.placeholder {
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  height: 100%;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  color: #9ca3af;
+/* Full width untuk card ketiga */
+.full-width { 
+  flex: 1 1 100%; 
+  width: 100%;
 }
 </style>
