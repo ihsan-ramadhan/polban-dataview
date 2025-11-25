@@ -20,7 +20,6 @@
                   />
                   <span class="nav-text">{{ item.name }}</span>
                 </div>
-                <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
               </router-link>
             </li>
           </ul>
@@ -39,9 +38,9 @@ export default {
   data() {
     return {
       mainMenu: [
-        { name: 'Home', path: '/', icon: '/images/home.svg', badge: null },
-        { name: 'Akademik', path: '/akademik', icon: '/images/akademik.svg', badge: null },
-        { name: 'Kemahasiswaan', path: '/kemahasiswaan', icon: '/images/kemahasiswaan.svg', badge: null },
+        { name: 'Home', path: '/', icon: '/images/home.svg'},
+        { name: 'Akademik', path: '/akademik', icon: '/images/akademik.svg'},
+        { name: 'Kemahasiswaan', path: '/kemahasiswaan', icon: '/images/kemahasiswaan.svg'},
       ]
     }
   }
@@ -55,10 +54,10 @@ export default {
   left: 0;
   bottom: 0;
   width: 280px;
-  background: var(--color-white);
-  border-right: 1px solid var(--color-gray-200);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
   box-shadow: var(--shadow-md);
-  transition: width var(--transition-normal);
+  transition: width var(--transition-normal), background-color 0.3s ease, border-color 0.3s ease;
   z-index: var(--z-fixed);
   overflow: hidden;
 }
@@ -73,21 +72,7 @@ export default {
   flex-direction: column;
   padding: var(--space-4) 0;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-gray-300) transparent;
-}
-
-.sidebar-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--color-gray-300);
-  border-radius: 3px;
+  overflow-x: hidden;
 }
 
 .sidebar-nav {
@@ -108,7 +93,7 @@ export default {
 .nav-section-title {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--color-gray-500);
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0 var(--space-3);
@@ -130,25 +115,32 @@ export default {
   gap: var(--space-3);
   padding: var(--space-3);
   text-decoration: none;
-  color: var(--color-gray-700);
+  color: var(--text-secondary);
   border-radius: var(--radius-xl);
-  transition: all var(--transition-normal);
+  transition: background var(--transition-normal), transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   position: relative;
   border: 1px solid transparent;
 }
 
+[data-theme="dark"] .nav-item {
+  color: var(--color-white);
+}
+
 .nav-item:hover {
-  background: var(--color-gray-50);
-  color: var(--color-gray-800);
+  background: var(--hover-bg);
+  color: var(--text-primary);
   transform: translateX(4px);
-  border-color: var(--color-gray-200);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-item:hover {
+  color: var(--color-white);
 }
 
 .nav-item--active {
   background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   color: var(--color-white);
-  box-shadow: 0 4px 16px rgba(246, 152, 62, 0.4);
-  border-color: transparent;
+  box-shadow: 0 0 16px rgba(246, 152, 62, 0.4);
 }
 
 .nav-item--active:hover {
@@ -169,46 +161,27 @@ export default {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  transition: all var(--transition-normal);
+  transition: transform var(--transition-normal), filter 0.3s ease;
   filter: saturate(100%) invert(33%) sepia(9%) hue-rotate(190deg) brightness(96%) contrast(89%);
 }
 
+[data-theme="dark"] .nav-icon {
+  filter: invert(100%) brightness(100%);
+}
+
 .nav-icon--active {
-  filter: invert(100%) brightness(110%);
+  filter: invert(100%) brightness(100%);
   transform: scale(1.1);
 }
 
 .nav-text {
   font-size: 0.875rem;
-  font-weight: 550;
-  transition: opacity var(--transition-normal);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nav-badge {
-  background: var(--color-secondary);
-  color: var(--color-white);
-  font-size: 0.65rem;
   font-weight: 600;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-xl);
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(246, 152, 62, 0.3);
 }
 
-.nav-item--active .nav-badge {
-  background: var(--color-white);
-  color: var(--color-secondary);
-}
-
-/* Collapsed State */
 .sidebar-collapsed .sidebar-profile,
 .sidebar-collapsed .nav-section-title,
 .sidebar-collapsed .nav-text,
-.sidebar-collapsed .nav-badge,
 .sidebar-collapsed .quick-actions,
 .sidebar-collapsed .sidebar-footer {
   display: none;
@@ -223,7 +196,6 @@ export default {
   justify-content: left;
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .app-sidebar.sidebar-collapsed {
     transform: translateX(-100%);
@@ -247,10 +219,6 @@ export default {
   .sidebar-collapsed .quick-actions,
   .sidebar-collapsed .sidebar-footer {
     display: flex;
-  }
-  
-  .sidebar-collapsed .nav-badge {
-    display: block;
   }
 }
 </style>

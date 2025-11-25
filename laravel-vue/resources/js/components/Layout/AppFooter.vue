@@ -54,6 +54,12 @@ export default {
     padding: 3rem 2rem 1rem;
     margin-top: auto;
     width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+[data-theme="dark"] .footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
 }
 
 .footer-content {
@@ -66,6 +72,10 @@ export default {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+[data-theme="dark"] .footer-content {
+    border-bottom: 1px solid var(--border-color);
+}
+
 .footer-section h4 {
     color: var(--color-white);
     font-size: 1.125rem;
@@ -73,11 +83,20 @@ export default {
     font-weight: 600;
 }
 
+[data-theme="dark"] .footer-section h4 {
+    color: var(--text-primary);
+}
+
 .footer-section p {
     color: var(--color-gray-300);
     font-size: 0.875rem;
     line-height: 1.6;
     margin: 0.5rem 0;
+    transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .footer-section p {
+    color: var(--text-secondary);
 }
 
 .footer-section ul {
@@ -97,6 +116,10 @@ export default {
     transition: color var(--transition-normal);
 }
 
+[data-theme="dark"] .footer-section a {
+    color: var(--text-secondary);
+}
+
 .footer-section a:hover {
     color: var(--color-secondary);
 }
@@ -112,5 +135,10 @@ export default {
     color: var(--color-gray-300);
     font-size: 0.875rem;
     margin: 0;
+    transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .footer-bottom p {
+    color: var(--text-secondary);
 }
 </style>
