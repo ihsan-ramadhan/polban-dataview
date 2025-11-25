@@ -53,8 +53,12 @@
           </transition>
         </button>
 
-        <div class="user-menu">
-          <button class="user-button">
+        <div class="user-menu" v-click-outside="closeDropdown">
+          <button 
+            class="user-button" 
+            @click="toggleDropdown"
+            :class="{ 'active': isDropdownOpen }"
+          >
             <div class="user-avatar">
               <img 
                 src="/images/profile/user-avatar.png" 
@@ -69,8 +73,26 @@
               src="/images/arrow-v.png"   
               alt="Arrow Down"
               class="user-arrow"
+              :class="{ 'rotated': isDropdownOpen }"
             />
           </button>
+
+          <transition name="dropdown">
+            <div v-if="isDropdownOpen" class="user-dropdown">
+              <div class="dropdown-content">
+                <button class="login-btn" @click="handleLoginClick">
+                  <span class="login-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <polyline points="10 17 15 12 10 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <line x1="15" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  LOGIN
+                </button>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
     </div>
@@ -80,10 +102,27 @@
 <script>
 export default {
   name: 'AppHeader',
-  emits: ['toggle-sidebar'],
+
+  emits: ['toggle-sidebar', 'show-login'],
+  directives: {
+    'click-outside': {
+      mounted(el, binding) {
+        el.clickOutsideEvent = function(event) {
+          if (!(el === event.target || el.contains(event.target))) {
+            binding.value(event, el);
+          }
+        };
+        document.body.addEventListener('click', el.clickOutsideEvent);
+      },
+      unmounted(el) {
+        document.body.removeEventListener('click', el.clickOutsideEvent);
+      }
+    }
+  },
   data() {
     return {
-      isDark: false
+      isDark: false,
+      isDropdownOpen: false
     }
   },
   mounted() {
@@ -105,6 +144,16 @@ export default {
       } else {
         document.documentElement.removeAttribute('data-theme')
       }
+    },
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen
+    },
+    closeDropdown() {
+      this.isDropdownOpen = false
+    },
+    handleLoginClick() {
+      this.$emit('show-login')
+      this.closeDropdown()
     }
   }
 }
@@ -356,6 +405,82 @@ export default {
 
 .user-button:hover .user-arrow {
   opacity: 1;
+}
+
+.user-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 180px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-4);
+  z-index: 100;
+  transform-origin: top right;
+}
+
+[data-theme="dark"] .user-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dropdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login-btn {
+  width: 100%;
+  padding: var(--space-3);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(246, 152, 62, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(246, 152, 62, 0.4);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.login-icon {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
 }
 
 @media (max-width: 1024px) {
