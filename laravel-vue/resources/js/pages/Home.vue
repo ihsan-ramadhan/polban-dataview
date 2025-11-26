@@ -99,7 +99,7 @@ export default {
 .welcome-banner {
     background-color: var(--color-banner);
     color: white;
-    padding: 2rem 2.5rem;
+    padding: 1.5rem 2rem 2rem 2.5rem;
     border-radius: 12px;
     margin-bottom: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -115,7 +115,7 @@ export default {
     font-size: 0.95rem;
     line-height: 1.6;
     opacity: 0.9;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .stats-grid {
