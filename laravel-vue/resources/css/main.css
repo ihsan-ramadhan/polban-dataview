@@ -40,6 +40,35 @@
   --transition-normal: 0.3s ease;
   
   --z-fixed: 1030;
+  
+  --bg-primary: var(--color-gray-50);
+  --bg-secondary: var(--color-white);
+  --text-primary: var(--color-gray-800);
+  --text-secondary: var(--color-gray-700);
+  --text-tertiary: var(--color-gray-500);
+  --border-color: var(--color-gray-300);
+  --hover-bg: var(--color-gray-100);
+}
+
+[data-theme="dark"] {
+  --color-primary: #3a4dc6;
+  --color-primary-dark: #2b3ba7;
+  --color-primary-light: #4a5dd6;
+  --color-primary-hover: #5468e6;
+  --color-secondary: #f6983e;
+  --color-secondary-dark: #de8836;
+  
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --border-color: #334155;
+  --hover-bg: #334155;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
 }
 
 * {
@@ -57,10 +86,11 @@ html {
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: var(--color-gray-50);
-  color: var(--color-gray-800);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.6;
   font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .text-gradient {
@@ -76,17 +106,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-gray-50);
+  background: var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-gray-300);
+  background: var(--border-color);
   border-radius: var(--radius-xl);
-  border: 2px solid var(--color-gray-50);
+  border: 2px solid var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gray-400);
+  background: var(--text-tertiary);
 }
 
 button {
