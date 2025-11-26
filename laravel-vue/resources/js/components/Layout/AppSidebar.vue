@@ -90,16 +90,6 @@ export default {
   gap: var(--space-2);
 }
 
-.nav-section-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0 var(--space-3);
-  margin-bottom: var(--space-1);
-}
-
 .nav-list {
   list-style: none;
   display: flex;
@@ -128,7 +118,6 @@ export default {
 
 .nav-item:hover {
   background: var(--hover-bg);
-  color: var(--text-primary);
   transform: translateX(4px);
   border-color: var(--border-color);
 }
@@ -146,7 +135,6 @@ export default {
 .nav-item--active:hover {
   background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-secondary) 100%);
   color: var(--color-white);
-  transform: translateX(4px);
 }
 
 .nav-item-content {
