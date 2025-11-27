@@ -6,7 +6,7 @@
 
 **Aplikasi Visualisasi Data Interaktif**
 
-Dashboard analitik modern untuk memantau data umum, akademik, kemahasiswaan prodi secara real-time dengan arsitektur Cloud-Native.
+Dashboard analitik modern untuk visualisasi data umum, akademik, dan kemahasiswaan prodi secara real-time dengan arsitektur Cloud-Native.
 
 [![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vue.js&logoColor=4FC08D)](https://vuejs.org/)
@@ -69,15 +69,15 @@ Proyek ini merupakan bagian dari kolaborasi tiga tim pengembang:
 flowchart LR
     subgraph DataSource [💾 Data Layer]
         direction TB
-        A[("🗄️ DataHub<br/>(Supabase/PostgreSQL)")]
+        A[("🗄️ DataHub<br/>(PostgreSQL)")]
     end
 
     subgraph Backend [⚙️ API Layer]
-        B["🔌 DataCore<br/>(Bun Runtime)"]
+        B["🔌 DataCore<br/>(NestJS)"]
     end
 
     subgraph Frontend [💻 Client Layer]
-        C["🖥️ DataView<br/>(Vue.js + Laravel)"]
+        C["🖥️ DataView<br/>(Laravel + Vue.js)"]
     end
 
     subgraph User [👤 End User]
@@ -250,32 +250,6 @@ php artisan key:generate
 # Jalankan migrasi database
 php artisan migrate
 ```
-
-#### 4️⃣ Konfigurasi Environment (Opsional)
-
-Buka file `.env` dan sesuaikan jika diperlukan:
-
-```env
-APP_NAME="Polban DataView"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://127.0.0.1:8000
-
-# Backend API Configuration
-API_BASE_URL=http://localhost:3000
-API_TIMEOUT=30
-
-# Session & Security
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-```
-
-> **⚠️ Catatan Penting**: 
-> - Database dikelola oleh tim **DataHub**
-> - API endpoint dikelola oleh tim **DataCore**
-> - Anda **TIDAK PERLU** setup database lokal
-
----
 
 ## 🎯 Menjalankan Aplikasi
 
