@@ -7,7 +7,7 @@
                 yang menyajikan cerita kampus dalam angka. Jelajahi statistik
                 akademik dan demografi Politeknik Negeri Bandung secara
                 interaktif, transparan, dan informatif untuk mendukung
-                pengambilan keputusan berbasis data
+                pengambilan keputusan berbasis data.
             </p>
         </div>
 
@@ -16,6 +16,7 @@
                 v-for="(card, index) in statCards"
                 :key="index"
                 class="stat-card"
+                @click="scrollToChart"
             >
                 <div class="icon-box">
                     <svg
@@ -34,15 +35,153 @@
                 </div>
             </div>
         </div>
+
+        <div id="target-chart-section" class="charts-grid">
+            <div class="chart-card">
+                <div class="card-header">
+                    <h2 class="chart-title">Rasio Gender</h2>
+                    <p class="chart-subtitle">
+                        Perbandingan Laki-laki dan Perempuan
+                    </p>
+                </div>
+                <div class="chart-container">
+                    <div v-if="isLoadingGender" class="state-container loading">
+                        <span class="loader-spinner"></span> Memuat...
+                    </div>
+                    <div v-else-if="errorGender" class="state-container error">
+                        <p>{{ errorGender }}</p>
+                        <button @click="fetchGenderData" class="retry-btn">
+                            Coba Lagi
+                        </button>
+                    </div>
+                    <BasePieChart
+                        v-else-if="genderChartData"
+                        :chart-data="genderChartData"
+                    />
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="card-header">
+                    <h2 class="chart-title">Persebaran Agama</h2>
+                    <p class="chart-subtitle">Statistik Agama Mahasiswa</p>
+                </div>
+                <div class="chart-container">
+                    <div v-if="isLoadingAgama" class="state-container loading">
+                        <span class="loader-spinner"></span> Memuat...
+                    </div>
+                    <div v-else-if="errorAgama" class="state-container error">
+                        <p>{{ errorAgama }}</p>
+                        <button @click="fetchAgamaData" class="retry-btn">
+                            Coba Lagi
+                        </button>
+                    </div>
+                    <BaseBarChart
+                        v-else-if="agamaChartData"
+                        :chart-data="agamaChartData"
+                    />
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="card-header">
+                    <h2 class="chart-title">Rasio Dosen : Mahasiswa</h2>
+                    <p class="chart-subtitle">Perbandingan Jumlah Pengajar</p>
+                </div>
+                <div class="chart-container">
+                    <div v-if="isLoadingDosen" class="state-container loading">
+                        <span class="loader-spinner"></span> Memuat...
+                    </div>
+                    <div v-else-if="errorDosen" class="state-container error">
+                        <p>{{ errorDosen }}</p>
+                        <button @click="fetchDosenData" class="retry-btn">
+                            Coba Lagi
+                        </button>
+                    </div>
+                    <BasePieChart
+                        v-else-if="dosenChartData"
+                        :chart-data="dosenChartData"
+                    />
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="card-header">
+                    <h2 class="chart-title">Asal Sekolah (SLTA)</h2>
+                    <p class="chart-subtitle">
+                        Jalur Masuk Berdasarkan Jenis Sekolah
+                    </p>
+                </div>
+                <div class="chart-container">
+                    <div v-if="isLoadingSLTA" class="state-container loading">
+                        <span class="loader-spinner"></span> Memuat...
+                    </div>
+                    <div v-else-if="errorSLTA" class="state-container error">
+                        <p>{{ errorSLTA }}</p>
+                        <button @click="fetchSLTAData" class="retry-btn">
+                            Coba Lagi
+                        </button>
+                    </div>
+                    <BaseBarChart
+                        v-else-if="sltaChartData"
+                        :chart-data="sltaChartData"
+                    />
+                </div>
+            </div>
+
+            <div class="chart-card span-full">
+                <div class="card-header">
+                    <h2 class="chart-title">Peta Sebaran Domisili</h2>
+                    <p class="chart-subtitle">
+                        Lokasi Asal Mahasiswa per Provinsi
+                    </p>
+                </div>
+                <div class="map-container-wrapper">
+                    <div
+                        v-if="isLoadingDomisili"
+                        class="state-container loading"
+                    >
+                        <span class="loader-spinner"></span> Memuat Peta...
+                    </div>
+                    <div
+                        v-else-if="errorDomisili"
+                        class="state-container error"
+                    >
+                        <p>{{ errorDomisili }}</p>
+                        <button @click="fetchDomisiliData" class="retry-btn">
+                            Coba Lagi
+                        </button>
+                    </div>
+                    <BaseMap
+                        v-else-if="domisiliData"
+                        :map-data="domisiliData"
+                    />
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+// --- IMPORT KOMPONEN ---
+import BasePieChart from "../components/Charts/BasePieChart.vue";
+import BaseBarChart from "../components/Charts/BaseBarChart.vue";
+import BaseMap from "../components/Charts/BaseMap.vue";
+
+// --- KONFIGURASI PORT ---
+// Pastikan ini sesuai dengan port mock server Anda (6767)
+const API_BASE_URL = "http://localhost:3000";
+
 export default {
     name: "Home",
+    components: {
+        BasePieChart,
+        BaseBarChart,
+        BaseMap,
+    },
     data() {
         return {
-            // --- Data untuk Kartu Grid ---
+            // --- DATA KARTU STATISTIK ---
             statCards: [
                 {
                     title: "Jenis Kelamin",
@@ -51,7 +190,6 @@ export default {
                     iconPath:
                         "M77.3331 8.07798e-05H63.2859C62.9468 -0.00323341 62.6146 0.0955015 62.3323 0.28346C62.0501 0.471418 61.8308 0.739913 61.7032 1.05407C61.5667 1.36928 61.5273 1.71803 61.5901 2.05573C61.6529 2.39342 61.815 2.70472 62.0557 2.9498L65.322 6.21608C65.6817 6.56141 65.6817 7.13337 65.322 7.47871L58.052 14.889C57.8944 15.0061 57.7033 15.0693 57.507 15.0693C57.3107 15.0693 57.1196 15.0061 56.962 14.889C52.3987 11.9893 46.9737 10.7552 41.605 11.3956C36.2364 12.0361 31.2539 14.5117 27.5008 18.4035C13.1119 16.0725 0.0503611 27.1483 0 41.7207C0.00709728 46.7658 1.64081 51.6741 4.65863 55.7171C7.67645 59.7601 11.9175 62.7222 16.7523 64.1637C17.1264 64.2717 17.3818 64.617 17.3818 65.0055V67.7789C17.3818 68.0117 17.2893 68.235 17.1247 68.3996C16.9601 68.5642 16.7368 68.6567 16.5041 68.6567H14.9573C14.3371 68.5615 13.7037 68.6015 13.1005 68.774C12.4972 68.9465 11.9384 69.2474 11.4623 69.656C10.9862 70.0646 10.604 70.5713 10.342 71.1414C10.08 71.7115 9.94441 72.3315 9.94441 72.9589C9.94441 73.5864 10.08 74.2064 10.342 74.7765C10.604 75.3466 10.9862 75.8533 11.4623 76.2619C11.9384 76.6705 12.4972 76.9714 13.1005 77.1439C13.7037 77.3164 14.3371 77.3564 14.9573 77.2612H16.6839C17.1659 77.2612 17.558 77.6569 17.558 78.1389V79.862C17.5092 80.4614 17.5851 81.0645 17.7809 81.6331C17.9768 82.2017 18.2883 82.7236 18.6959 83.1657C19.1035 83.6079 19.5984 83.9609 20.1492 84.2023C20.7 84.4437 21.2949 84.5683 21.8963 84.5683C22.4977 84.5683 23.0926 84.4437 23.6434 84.2023C24.1942 83.9609 24.689 83.6079 25.0967 83.1657C25.5043 82.7236 25.8158 82.2017 26.0117 81.6331C26.2075 81.0645 26.2834 80.4614 26.2345 79.862V78.1389C26.2304 77.9337 26.2983 77.7335 26.4264 77.5731C26.5546 77.4128 26.7349 77.3024 26.936 77.2612H28.6914C29.7769 77.1674 30.7876 76.6698 31.524 75.867C32.2605 75.0641 32.669 74.0142 32.669 72.9248C32.669 71.8353 32.2605 70.7854 31.524 69.9826C30.7876 69.1797 29.7769 68.6822 28.6914 68.5883H26.936C26.7061 68.5794 26.4879 68.4841 26.3252 68.3214C26.1625 68.1587 26.0672 67.9405 26.0583 67.7106V65.7069C26.0654 65.4974 26.1473 65.2973 26.2892 65.1429C26.431 64.9885 26.6235 64.89 26.8317 64.8652C31.8606 64.1083 36.5136 61.7566 40.1054 58.1564C54.4727 60.3075 67.4371 49.2928 67.6386 34.7672C67.6925 30.3058 66.4747 25.9212 64.1277 22.1266C64.0077 21.9772 63.9423 21.7912 63.9423 21.5996C63.9423 21.408 64.0077 21.222 64.1277 21.0726L71.538 13.6623C71.6184 13.5744 71.7162 13.5041 71.8251 13.4558C71.9341 13.4075 72.0519 13.3823 72.1711 13.3817C72.4085 13.3925 72.6351 13.4897 72.8006 13.6623L76.0309 16.8926C76.2763 17.1338 76.5871 17.2975 76.9247 17.3634C77.2624 17.4294 77.612 17.3947 77.9301 17.2636C78.2481 17.1325 78.5207 16.9109 78.7139 16.6262C78.907 16.3415 79.0123 16.0064 79.0166 15.6624V1.61883C78.9888 1.18784 78.8005 0.782917 78.4889 0.483923C78.1772 0.184929 77.7648 0.0135807 77.3331 0.00367801M45.7243 49.4871C46.7915 46.4546 47.2268 43.2358 47.0034 40.0288C46.7801 36.8218 45.9029 33.6944 44.4257 30.8391C44.1643 30.3251 43.8035 29.868 43.3642 29.4944C42.9249 29.1208 42.4159 28.838 41.8666 28.6625C41.3173 28.487 40.7387 28.4222 40.1641 28.4718C39.5896 28.5215 39.0306 28.6846 38.5196 28.9518C38.0086 29.219 37.5556 29.5849 37.187 30.0283C36.8183 30.4718 36.5413 30.9839 36.3719 31.5352C36.2026 32.0864 36.1443 32.6658 36.2004 33.2397C36.2565 33.8136 36.426 34.3707 36.6989 34.8787C37.85 37.0371 38.4255 39.4544 38.386 41.9005C38.3716 53.2821 26.0439 60.3831 16.1911 54.6815C6.33831 48.9799 6.35629 34.7528 16.2199 29.0692C18.1039 27.9846 20.2045 27.3299 22.3711 27.1519C21.4396 29.5877 20.9288 32.164 20.8603 34.7708C20.8564 39.3966 22.2247 43.9196 24.7921 47.7676C25.46 48.6555 26.4422 49.2543 27.5374 49.4414C28.6326 49.6285 29.7579 49.3897 30.6827 48.774C31.6075 48.1582 32.2618 47.212 32.5116 46.1294C32.7614 45.0468 32.5877 43.9096 32.0261 42.9509C25.7165 33.4794 32.0261 20.7273 43.3825 19.997C54.7389 19.2668 62.6276 31.1053 57.5843 41.307C56.4565 43.5871 54.7594 45.5377 52.6572 46.97C50.5549 48.4024 48.1187 49.2681 45.584 49.4835L45.7243 49.4871Z",
                 },
-
                 {
                     title: "Asal SLTA",
                     desc: "Pemetaan latar belakang pendidikan pendaftar berdasarkan asal sekolah (SMA/SMK/MA).",
@@ -76,26 +214,251 @@ export default {
                 {
                     title: "Rasio",
                     desc: "Analisis proporsi populasi civitas akademika dalam berbagai kategori statistik.",
+                    viewBox: "0 0 24 24",
                     iconPath:
                         "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
                 },
                 {
                     title: "Domisili",
                     desc: "Peta sebaran asal daerah dan tempat tinggal mahasiswa Politeknik Negeri Bandung.",
+                    viewBox: "0 0 24 24",
                     iconPath:
                         "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
                 },
             ],
+
+            // DATA CHARTS
+            genderChartData: null,
+            isLoadingGender: true,
+            errorGender: null,
+
+            dosenChartData: null,
+            isLoadingDosen: true,
+            errorDosen: null,
+
+            agamaChartData: null,
+            isLoadingAgama: true,
+            errorAgama: null,
+
+            sltaChartData: null,
+            isLoadingSLTA: true,
+            errorSLTA: null,
+
+            domisiliData: null,
+            isLoadingDomisili: true,
+            errorDomisili: null,
         };
+    },
+    mounted() {
+        this.fetchAllData();
+    },
+    methods: {
+        // --- SCROLL TO CHART ---
+        scrollToChart() {
+            const element = document.getElementById("target-chart-section");
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
+        },
+
+        // --- MAIN FETCH FUNCTION ---
+        fetchAllData() {
+            this.fetchGenderData();
+            this.fetchDosenData();
+            this.fetchAgamaData();
+            this.fetchSLTAData();
+            this.fetchDomisiliData();
+        },
+
+        // 1. Gender
+        async fetchGenderData() {
+            this.isLoadingGender = true;
+            this.errorGender = null;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/guest/mahasiswa/gender`
+                );
+                if (!response.ok)
+                    throw new Error(`Server Error: ${response.status}`);
+                const rawData = this.normalizeData(await response.json());
+
+                this.genderChartData = {
+                    labels: rawData.map((item) => item.jenis),
+                    datasets: [
+                        {
+                            backgroundColor: ["#42A5F5", "#FF6384"],
+                            data: rawData.map((item) => item.total),
+                        },
+                    ],
+                };
+            } catch (error) {
+                console.error("Gender Error:", error);
+                this.errorGender = "Gagal memuat data gender.";
+            } finally {
+                this.isLoadingGender = false;
+            }
+        },
+
+        // 2. Dosen
+        async fetchDosenData() {
+            this.isLoadingDosen = true;
+            this.errorDosen = null;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/guest/mahasiswa/rasio-dosen-mhs`
+                );
+                if (response.status === 404)
+                    throw new Error("Data belum tersedia (404)");
+                if (!response.ok)
+                    throw new Error(`Server Error: ${response.status}`);
+                const rawData = this.normalizeData(await response.json());
+
+                this.dosenChartData = {
+                    labels: rawData.map((item) => item.jenis),
+                    datasets: [
+                        {
+                            backgroundColor: ["#7E57C2", "#FFA726"],
+                            data: rawData.map((item) => item.total),
+                        },
+                    ],
+                };
+            } catch (error) {
+                console.error("Dosen Error:", error);
+                this.errorDosen = error.message;
+            } finally {
+                this.isLoadingDosen = false;
+            }
+        },
+
+        // 3. Agama
+        async fetchAgamaData() {
+            this.isLoadingAgama = true;
+            this.errorAgama = null;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/guest/mahasiswa/agama`
+                );
+                if (response.status === 404)
+                    throw new Error("Data belum tersedia (404)");
+                if (!response.ok)
+                    throw new Error(`Server Error: ${response.status}`);
+                const rawData = this.normalizeData(await response.json());
+
+                const colors = [
+                    "#21308f",
+                    "#f6983e",
+                    "#34d399",
+                    "#ef4444",
+                    "#6366f1",
+                    "#64748b",
+                ];
+                this.agamaChartData = {
+                    labels: rawData.map((item) => item.agama),
+                    datasets: [
+                        {
+                            label: "Jumlah Mahasiswa",
+                            backgroundColor: colors,
+                            data: rawData.map((item) => item.total),
+                            borderRadius: 6,
+                            barThickness: 30,
+                        },
+                    ],
+                };
+            } catch (error) {
+                console.error("Agama Error:", error);
+                this.errorAgama = error.message;
+            } finally {
+                this.isLoadingAgama = false;
+            }
+        },
+
+        // 4. SLTA
+        async fetchSLTAData() {
+            this.isLoadingSLTA = true;
+            this.errorSLTA = null;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/guest/mahasiswa/jenis-slta`
+                );
+                if (response.status === 404)
+                    throw new Error("Data belum tersedia (404)");
+                if (!response.ok)
+                    throw new Error(`Server Error: ${response.status}`);
+                const rawData = this.normalizeData(await response.json());
+
+                const colors = ["#06b6d4", "#8b5cf6", "#f97316", "#10b981"];
+                this.sltaChartData = {
+                    labels: rawData.map((item) => item.jenis),
+                    datasets: [
+                        {
+                            label: "Jumlah Mahasiswa",
+                            backgroundColor: colors,
+                            data: rawData.map((item) => item.total),
+                            borderRadius: 6,
+                            barThickness: 40,
+                        },
+                    ],
+                };
+            } catch (error) {
+                console.error("SLTA Error:", error);
+                this.errorSLTA = error.message;
+            } finally {
+                this.isLoadingSLTA = false;
+            }
+        },
+
+        // 5. Domisili
+        async fetchDomisiliData() {
+            this.isLoadingDomisili = true;
+            this.errorDomisili = null;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/v1/guest/mahasiswa/domisili`
+                );
+                if (response.status === 404)
+                    throw new Error("Data peta belum tersedia (404)");
+                if (!response.ok)
+                    throw new Error(`Server Error: ${response.status}`);
+                const rawData = this.normalizeData(await response.json());
+
+                const validData = rawData.filter(
+                    (item) => item.geo && item.geo.lat && item.geo.lng
+                );
+                if (validData.length === 0)
+                    throw new Error("Data tidak memiliki koordinat (geo)");
+
+                this.domisiliData = validData;
+            } catch (error) {
+                console.error("Domisili Error:", error);
+                this.errorDomisili = error.message;
+            } finally {
+                this.isLoadingDomisili = false;
+            }
+        },
+
+        // Helper
+        normalizeData(responseData) {
+            let rawData = responseData.data || responseData;
+            if (responseData.payload) rawData = responseData.payload;
+            if (!Array.isArray(rawData) && responseData.all?.data)
+                rawData = responseData.all.data;
+            if (!Array.isArray(rawData))
+                throw new Error("Format data tidak valid");
+            return rawData;
+        },
     },
 };
 </script>
 
 <style scoped>
+/* --- VARIABEL WARNA --- */
 .home-page {
-    --polban-blue: #1a237e;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
+/* --- BANNER --- */
 .welcome-banner {
     background-color: var(--color-banner);
     color: white;
@@ -118,10 +481,12 @@ export default {
     max-width: 100%;
 }
 
+/* --- STATS GRID --- */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .stat-card {
@@ -172,21 +537,130 @@ export default {
     line-height: 1.3;
 }
 
-@media (max-width: 992px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+/* --- CHARTS GRID --- */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    width: 100%;
+}
+
+.chart-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--border-color);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.chart-subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-chart);
+    margin-bottom: var(--space-4);
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+}
+
+.map-container-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-gray-200);
+}
+
+/* --- LOADING & ERROR STATES --- */
+.state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: var (--text-primary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.state-container.error {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px dashed #d32f2f;
+}
+
+.retry-btn {
+    margin-top: 8px;
+    padding: 4px 12px;
+    background: white;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.loader-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
 
-@media (max-width: 576px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
+/* --- RESPONSIVE MEDIA QUERIES --- */
+/* Style untuk layar Desktop/Tablet Besar */
+@media (min-width: 768px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 Kolom Chart */
+    }
+    .chart-container {
+        height: 300px; /* Lebih tinggi di desktop */
     }
 
+    /* Class Penting untuk Peta */
+    .span-full {
+        grid-column: span 2; /* Peta melebar penuh */
+    }
+}
+
+/* Style untuk Tablet Kecil */
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 Kolom Menu */
+    }
+}
+
+/* Style untuk HP */
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr; /* 1 Kolom Menu */
+    }
     .welcome-banner {
         padding: 1.5rem;
     }
-
     .banner-title {
         font-size: 1.5rem;
     }
