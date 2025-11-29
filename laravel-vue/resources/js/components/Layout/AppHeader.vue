@@ -67,7 +67,7 @@
               />
             </div>
             <div class="user-info">
-              <span class="user-name">Guest</span>
+              <span class="user-name">{{ userName }}</span>
             </div>
             <img 
               src="/images/arrow-v.png"   
@@ -80,7 +80,8 @@
           <transition name="dropdown">
             <div v-if="isDropdownOpen" class="user-dropdown">
               <div class="dropdown-content">
-                <button class="login-btn" @click="handleLoginClick">
+                <!-- Show LOGIN if not authenticated -->
+                <button v-if="!isAuthenticated" class="login-btn" @click="handleLoginClick">
                   <span class="login-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -88,7 +89,19 @@
                       <line x1="15" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   </span>
-                  LOGIN
+                  Login
+                </button>
+                
+                <!-- Show LOGOUT if authenticated -->
+                <button v-else class="logout-btn" @click="handleLogout">
+                  <span class="logout-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <polyline points="16 17 21 12 16 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <line x1="21" y1="12" x2="9" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  Logout
                 </button>
               </div>
             </div>
@@ -103,7 +116,7 @@
 export default {
   name: 'AppHeader',
 
-  emits: ['toggle-sidebar', 'show-login'],
+  emits: ['toggle-sidebar', 'show-login', 'auth-changed'],
   directives: {
     'click-outside': {
       mounted(el, binding) {
@@ -122,7 +135,10 @@ export default {
   data() {
     return {
       isDark: false,
-      isDropdownOpen: false
+      isDropdownOpen: false,
+      isAuthenticated: false,
+      userName: 'Guest',
+      userData: null
     }
   },
   mounted() {
@@ -131,8 +147,62 @@ export default {
     
     this.isDark = savedTheme === 'dark' || (!savedTheme && prefersDark)
     this.applyTheme()
+    
+    // Check authentication status
+    this.checkAuth()
+    
+    // Listen for storage changes (when user logs in from LoginModal)
+    window.addEventListener('storage', this.checkAuth)
+    // Listen for custom event from LoginModal
+    window.addEventListener('auth-changed', this.checkAuth)
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.checkAuth)
+    window.removeEventListener('auth-changed', this.checkAuth)
   },
   methods: {
+    checkAuth() {
+      const token = localStorage.getItem('auth_token')
+      const userDataStr = localStorage.getItem('user_data')
+      
+      if (token && userDataStr) {
+        try {
+          this.userData = JSON.parse(userDataStr)
+          this.userName = this.userData.name || 'User'
+          this.isAuthenticated = true
+        } catch (e) {
+          console.error('Error parsing user data:', e)
+          this.resetAuth()
+        }
+      } else {
+        this.resetAuth()
+      }
+    },
+    resetAuth() {
+      this.isAuthenticated = false
+      this.userName = 'Guest'
+      this.userData = null
+    },
+    handleLogout() {
+      // Clear localStorage
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_data')
+      
+      // Reset state
+      this.resetAuth()
+      this.closeDropdown()
+      
+      // Emit event untuk notify components lain
+      this.$emit('auth-changed', false)
+      window.dispatchEvent(new CustomEvent('auth-changed'))
+      
+      // Redirect ke home
+      if (this.$route.path !== '/') {
+        this.$router.push('/')
+      }
+      
+      console.log('✅ Logout berhasil')
+    },
     toggleTheme() {
       this.isDark = !this.isDark
       this.applyTheme()
@@ -440,21 +510,25 @@ export default {
   gap: var(--space-3);
 }
 
-.login-btn {
+.login-btn,
+.logout-btn {
   width: 100%;
   padding: var(--space-3);
-  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   color: white;
   border: none;
   border-radius: var(--radius-lg);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.875rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
   transition: all 0.2s ease;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   box-shadow: 0 4px 12px rgba(246, 152, 62, 0.3);
 }
 
@@ -463,11 +537,23 @@ export default {
   box-shadow: 0 6px 16px rgba(246, 152, 62, 0.4);
 }
 
-.login-btn:active {
+.logout-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.login-btn:active,
+.logout-btn:active {
   transform: translateY(0);
 }
 
-.login-icon {
+.login-icon,
+.logout-icon {
   display: flex;
   align-items: center;
 }

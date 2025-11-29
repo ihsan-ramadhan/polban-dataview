@@ -43,14 +43,31 @@ export default {
         { name: 'Home', path: '/', icon: '/images/home.svg', restricted: false},
         { name: 'Akademik', path: '/akademik', icon: '/images/akademik.svg', restricted: true},
         { name: 'Kemahasiswaan', path: '/kemahasiswaan', icon: '/images/kemahasiswaan.svg', restricted: true},
-      ]
+      ],
+      isAuthenticated: false
     }
   },
+  mounted() {
+    // Check authentication on mount
+    this.checkAuth()
+    
+    // Listen for auth changes
+    window.addEventListener('auth-changed', this.checkAuth)
+  },
+  beforeUnmount() {
+    window.removeEventListener('auth-changed', this.checkAuth)
+  },
   methods: {
+    checkAuth() {
+      const token = localStorage.getItem('auth_token')
+      this.isAuthenticated = !!token // Convert to boolean
+    },
     handleItemClick(item) {
-      if (item.restricted) {
+      // If page is restricted and user is NOT authenticated, show login
+      if (item.restricted && !this.isAuthenticated) {
         this.$emit('show-login');
       } else {
+        // User is authenticated OR page is not restricted, navigate
         if (this.$route.path !== item.path) {
           this.$router.push(item.path);
         }

@@ -12,6 +12,16 @@
 
         <!-- Form Section -->
         <form class="login-form" @submit.prevent="handleLogin">
+          <!-- Error Message -->
+          <div v-if="error" class="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {{ error }}
+          </div>
+
           <div class="form-group">
             <div class="input-wrapper">
               <span class="input-icon">
@@ -21,10 +31,12 @@
                 </svg>
               </span>
               <input 
-                type="text" 
-                v-model="username" 
-                placeholder="USERNAME" 
+                type="email" 
+                v-model="email" 
+                placeholder="Email" 
                 class="form-input"
+                required
+                :disabled="isLoading"
               />
             </div>
           </div>
@@ -40,14 +52,17 @@
               <input 
                 type="password" 
                 v-model="password" 
-                placeholder="PASSWORD" 
+                placeholder="Password" 
                 class="form-input"
+                required
+                :disabled="isLoading"
               />
             </div>
           </div>
 
-          <button type="submit" class="login-btn">
-            LOGIN
+          <button type="submit" class="login-btn" :disabled="isLoading">
+            <span v-if="isLoading" class="loader"></span>
+            <span v-else>Login</span>
           </button>
 
           <a href="#" class="forgot-password">Forgot Password?</a>
@@ -59,6 +74,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'LoginModal',
   props: {
@@ -70,17 +87,69 @@ export default {
   emits: ['close'],
   data() {
     return {
-      username: '',
-      password: ''
+      email: '',
+      password: '',
+      isLoading: false,
+      error: null
     }
   },
   methods: {
     closeModal() {
       this.$emit('close');
+      // Reset form when closing
+      this.email = '';
+      this.password = '';
+      this.error = null;
+      this.isLoading = false;
     },
-    handleLogin() {
-      // Implement login logic here
-      console.log('Login attempt:', this.username);
+    async handleLogin() {
+      // Reset error state
+      this.error = null;
+      this.isLoading = true;
+
+      try {
+        // Kirim request ke polban-datahub API
+        const response = await axios.post('http://localhost:8000/api/login', {
+          email: this.email,
+          password: this.password
+        });
+
+        // Simpan token dan user data ke localStorage
+        localStorage.setItem('auth_token', response.data.token);
+        localStorage.setItem('user_data', JSON.stringify(response.data.user));
+
+        console.log('✅ Login berhasil:', response.data);
+
+        // Trigger custom event to notify other components
+        window.dispatchEvent(new CustomEvent('auth-changed'));
+
+        // Reset form
+        this.email = '';
+        this.password = '';
+        
+        // Close modal
+        this.$emit('close');
+        
+        // Optional: Reload halaman atau redirect
+        // window.location.reload();
+
+      } catch (err) {
+        // Handle error
+        console.error('❌ Login gagal:', err);
+        
+        if (err.response && err.response.data) {
+          // Error dari server
+          this.error = err.response.data.message || 'Login gagal. Silakan coba lagi.';
+        } else if (err.request) {
+          // Network error
+          this.error = 'Tidak dapat terhubung ke server. Pastikan backend berjalan di port 8000.';
+        } else {
+          // Error lainnya
+          this.error = 'Terjadi kesalahan. Silakan coba lagi.';
+        }
+      } finally {
+        this.isLoading = false;
+      }
     }
   }
 }
@@ -125,7 +194,7 @@ export default {
   width: 80px;
   height: 80px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -186,6 +255,7 @@ export default {
   border: none;
   color: white;
   padding: 1rem 1rem 1rem 0;
+  font-family: poppins, sans-serif;
   font-size: 0.9rem;
   outline: none;
   width: 100%;
@@ -193,7 +263,7 @@ export default {
 
 .form-input::placeholder {
   color: #718096;
-  text-transform: uppercase;
+  font-family: poppins, sans-serif;
   font-size: 0.8rem;
   letter-spacing: 1px;
 }
@@ -240,6 +310,50 @@ export default {
 
 .back-to-home:hover {
   color: white;
+}
+
+/* Error Message */
+.error-message {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+}
+
+/* Loading Spinner */
+.loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-primary);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn:disabled:hover {
+  transform: none;
 }
 
 /* Transitions */
