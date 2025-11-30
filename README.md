@@ -40,14 +40,10 @@ Dashboard analitik modern untuk visualisasi data umum, akademik, dan kemahasiswa
 - [👥 Tim Pengembang](#-tim-pengembang-kelompok-c33)
 - [💻 Panduan Instalasi](#-panduan-instalasi)
 - [🎯 Menjalankan Aplikasi](#-menjalankan-aplikasi)
-- [📂 Struktur Folder](#-struktur-folder)
 - [🚨 Troubleshooting](#-troubleshooting)
 - [📊 API Endpoints](#-api-endpoints-datacore)
-- [🔧 Development Tips](#-development-tips)
 - [⭐ Acknowledgments](#-acknowledgments)
 - [📚 Resources & Documentation](#-resources--documentation)
-- [📝 Lisensi](#-lisensi)
-- [📸 Preview](#-preview)
 
 ---
 
@@ -69,15 +65,15 @@ Proyek ini merupakan bagian dari kolaborasi tiga tim pengembang:
 flowchart LR
     subgraph DataSource [💾 Data Layer]
         direction TB
-        A[("🗄️ DataHub<br/>(PostgreSQL)")]
+        A[("🗄️ DataHub")]
     end
 
     subgraph Backend [⚙️ API Layer]
-        B["🔌 DataCore<br/>(NestJS)"]
+        B["🔌 DataCore"]
     end
 
     subgraph Frontend [💻 Client Layer]
-        C["🖥️ DataView<br/>(Laravel + Vue.js)"]
+        C["🖥️ DataView"]
     end
 
     subgraph User [👤 End User]
@@ -104,7 +100,7 @@ flowchart LR
 ### 📊 Visualisasi Interaktif
 - **Grafik Dinamis**: Pie Chart dan Bar Chart menggunakan Chart.js
 - **Peta Sebaran**: Visualisasi domisili mahasiswa dengan Leaflet.js
-- **Integrasi API**: Mengonsumsi data *real-time* dan teragregasi yang disediakan oleh tim DataCore.
+- **Integrasi API**: Mengonsumsi data teragregasi yang disediakan oleh tim DataCore.
 
 ### 🔐 Sistem Akses Bertingkat
 
@@ -130,11 +126,8 @@ flowchart LR
   - [Leaflet.js](https://leafletjs.com/) - Peta interaktif
 - **Styling**: Custom CSS dengan CSS Variables
 
-### Backend Integration
+### Backend
 - **Framework**: [Laravel](https://laravel.com/)
-- **API Server**: [Bun Runtime](https://bun.sh/)
-- **Database**: [Supabase PostgreSQL](https://supabase.com/)
-- **Caching**: [Upstash Redis](https://upstash.com/)
 
 ## 👥 Tim Pengembang (Kelompok C3.3)
 
@@ -279,61 +272,6 @@ npm run build
 php artisan serve
 ```
 
-### 🌐 Akses Aplikasi
-
-Buka browser dan akses: **http://127.0.0.1:8000**
-
----
-
-## 📂 Struktur Folder
-
-```
-polban-dataview/
-├── 📁 laravel-vue/                  # Main Laravel + Vue application
-│   ├── 📁 app/                      # Laravel application logic
-│   │   ├── 📁 Http/                 # HTTP controllers
-│   │   ├── 📁 Models/               # Database models
-│   │   ├── 📁 Providers/            # Service providers
-│   │   └── 📁 Traits/               # Reusable traits
-│   ├── 📁 config/                   # Configuration files
-│   ├── 📁 database/                 # Database files
-│   ├── 📁 public/                   # Public assets
-│   │   └── 📁 images/               # Images & logos
-│   ├── 📁 resources/
-│   │   ├── 📁 css/
-│   │   │   └── main.css             # Global styles & CSS variables
-│   │   ├── 📁 js/
-│   │   │   ├── 📁 components/
-│   │   │   │   ├── 📁 Charts/      # Reusable chart components
-│   │   │   │   │   ├── BasePieChart.vue
-│   │   │   │   │   ├── BaseBarChart.vue
-│   │   │   │   │   └── BaseMap.vue
-│   │   │   │   └── 📁 Layout/      # Layout components
-│   │   │   │       ├── AppHeader.vue
-│   │   │   │       ├── AppSidebar.vue
-│   │   │   │       └── AppFooter.vue
-│   │   │   ├── 📁 pages/            # Main pages
-│   │   │   │   ├── Home.vue         # Public data & maps
-│   │   │   │   ├── Akademik.vue     # Academic data (Internal)
-│   │   │   │   └── Kemahasiswaan.vue # Student affairs (Internal)
-│   │   │   ├── 📁 router/           # Vue Router configuration
-│   │   │   │   └── index.js
-│   │   │   ├── App.vue              # Root component
-│   │   │   └── app.js               # Entry point
-│   │   └── 📁 views/                # Laravel Blade templates
-│   ├── 📁 routes/                   # Laravel routes
-│   │   └── web.php
-│   ├── 📁 storage/                  # Laravel storage
-│   ├── 📁 tests/                   # Laravel tests
-│   ├── .env.example                 # Environment template
-│   ├── .gitignore                   # Git ignore
-│   ├── composer.json                # PHP dependencies
-│   ├── package.json                 # Node dependencies
-│   ├── vite.config.js               # Vite configuration
-│   └── README.md                    # Laravel + Vue Documentation
-└── README.md                        # Project root documentation
-```
-
 ---
 
 ## 🚨 Troubleshooting
@@ -371,85 +309,15 @@ The php.ini used by your command-line PHP is: C:\xampp\php\php.ini
 
 ---
 
-### ❌ Error 404 pada Salah Satu Chart
-
-**Penyebab**: Endpoint API belum dibuat
-
-**Solusi**: Laporkan ke tim Backend (DataCore) untuk menambahkan endpoint
-
-### ❌ Layar Putih / "Vite manifest not found"
-
-**Penyebab**: Vite dev server tidak berjalan
-
-**Solusi**:
-```bash
-# Pastikan terminal kedua menjalankan:
-npm run dev
-```
-
-### ❌ Error "Class 'Composer\...' not found"
-
-**Penyebab**: Dependencies belum terinstall
-
-**Solusi**:
-```bash
-composer install
-```
-
-### ❌ Port 8000 Already in Use
-
-**Solusi**: Gunakan port lain
-```bash
-php artisan serve --port=8001
-```
-
----
-
----
 
 ## 📊 API Endpoints (DataCore)
 
-Aplikasi ini menggunakan REST API yang disediakan oleh layanan **DataCore**. Untuk melihat daftar lengkap endpoint, struktur request, dan contoh response, silakan kunjungi dokumentasi interaktif kami:
-
-[![API Docs](https://img.shields.io/badge/📖_Buka_Dokumentasi_API-DataCore-0078D4?style=for-the-badge&logo=swagger&logoColor=white)](https://ikhsan3adi.is-a.dev/polban-datacore-api-docs/)
+Aplikasi ini menggunakan REST API yang disediakan oleh layanan **DataCore**. Untuk melihat daftar lengkap endpoint, struktur request, dan contoh response, silakan kunjungi dokumentasi ini:
 
 **URL Dokumentasi:** 🔗 [https://ikhsan3adi.is-a.dev/polban-datacore-api-docs/](https://ikhsan3adi.is-a.dev/polban-datacore-api-docs/)
 
 ---
 
-## 🔧 Development Tips
-
-### Hot Reload Issues?
-
-Jika hot reload tidak berfungsi:
-```bash
-# Clear cache
-php artisan cache:clear
-php artisan view:clear
-php artisan config:clear
-
-# Restart Vite
-npm run dev
-```
-
-### Code Style
- 
-Gunakan Prettier dan ESLint untuk konsistensi:
-```bash
-# Install (jika belum)
-npm install -D prettier eslint
-
-# Format code
-npm run format
-```
-
-### Debugging Vue Components
-
-Install Vue DevTools:
-- [Chrome Extension](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-- [Firefox Extension](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-
----
 
 ## ⭐ Acknowledgments
 
@@ -479,29 +347,6 @@ Terima kasih kepada:
 - [Laravel + Vue.js Setup Guide](https://laravel.com/docs/vite#vue)
 - [Chart.js with Vue 3](https://vue-chartjs.org/guide/)
 - [Leaflet Quick Start](https://leafletjs.com/examples/quick-start/)
-
----
-
-## 📝 Lisensi
-
-© 2025 Kelompok C3.3 - D3 Teknik Informatika Politeknik Negeri Bandung.  
-Proyek ini dibuat untuk keperluan akademik.
-
-
-## 📸 Preview
-
-<div align="center">
-
-### 🏠 Halaman Home (Public Access)
-*Dashboard utama dengan visualisasi data publik dan peta sebaran mahasiswa*
-
-### 📚 Halaman Akademik (Internal)
-*Visualisasi data akademik dengan berbagai metrik performa*
-
-### 👨‍🎓 Halaman Kemahasiswaan (Internal)
-*Dashboard kemahasiswaan dengan statistik lengkap*
-
-</div>
 
 ---
 
