@@ -7,19 +7,6 @@
             </div>
 
             <div class="footer-section">
-                <h4>Menu Cepat</h4>
-                <ul>
-                    <li><router-link to="/">Home</router-link></li>
-                    <li><router-link to="/akademik">Akademik</router-link></li>
-                    <li>
-                        <router-link to="/kemahasiswaan"
-                            >Kemahasiswaan</router-link
-                        >
-                    </li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
                 <h4>Hubungi Kami</h4>
                 <p>Jl. Gegerkalong Hilir, Ciwaruga, Kec. Parongpong, Kabupaten Bandung Barat, Jawa Barat 
                     <br>Kode Pos 40559 | Kotak Pos Bandung 1234</p>

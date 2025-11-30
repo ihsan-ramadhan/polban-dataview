@@ -8,9 +8,12 @@
           @click="$emit('toggle-sidebar')"
           aria-label="Toggle sidebar"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <img 
+            src="/images/menu.svg" 
+            alt="Menu"
+            width="20" 
+            height="20"
+          />
         </button>
         
         <div class="logo">
@@ -36,20 +39,22 @@
           :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
         >
           <transition name="theme-icon" mode="out-in">
-            <svg v-if="isDark" key="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="12" cy="12" r="5" stroke-width="2"/>
-              <line x1="12" y1="1" x2="12" y2="3" stroke-width="2" stroke-linecap="round"/>
-              <line x1="12" y1="21" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2" stroke-linecap="round"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2" stroke-linecap="round"/>
-              <line x1="1" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round"/>
-              <line x1="21" y1="12" x2="23" y2="12" stroke-width="2" stroke-linecap="round"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2" stroke-linecap="round"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <svg v-else key="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <img 
+              v-if="isDark" 
+              key="sun" 
+              src="/images/sun.svg"
+              alt="Light Mode"
+              width="20" 
+              height="20"
+            />
+            <img 
+              v-else 
+              key="moon" 
+              src="/images/moon.svg"
+              alt="Dark Mode"
+              width="20" 
+              height="20"
+            />
           </transition>
         </button>
 
@@ -83,11 +88,12 @@
                 <!-- Show LOGIN if not authenticated -->
                 <button v-if="!isAuthenticated" class="login-btn" @click="handleLoginClick">
                   <span class="login-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <polyline points="10 17 15 12 10 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <line x1="15" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <img 
+                      src="/images/auth.svg" 
+                      alt="Login"
+                      width="20" 
+                      height="20"
+                    />
                   </span>
                   Login
                 </button>
@@ -95,11 +101,12 @@
                 <!-- Show LOGOUT if authenticated -->
                 <button v-else class="logout-btn" @click="handleLogout">
                   <span class="logout-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <polyline points="16 17 21 12 16 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <line x1="21" y1="12" x2="9" y2="12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <img 
+                      src="/images/auth.svg" 
+                      alt="Logout"
+                      width="20" 
+                      height="20"
+                    />
                   </span>
                   Logout
                 </button>

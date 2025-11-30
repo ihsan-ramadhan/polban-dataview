@@ -140,6 +140,9 @@ export default {
   transition: background var(--transition-normal), transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   position: relative;
   border: 1px solid transparent;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 [data-theme="dark"] .nav-item {
