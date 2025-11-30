@@ -1,13 +1,14 @@
 <template>
   <div id="app">
-    <AppHeader @toggle-sidebar="handleToggleSidebar" />
-    <AppSidebar :isOpen="isSidebarOpen" />
+    <AppHeader @toggle-sidebar="handleToggleSidebar" @show-login="isLoginModalOpen = true" />
+    <AppSidebar :isOpen="isSidebarOpen" @show-login="isLoginModalOpen = true" />
     <main class="main-content" :class="{ 'main-expanded': !isSidebarOpen }">
       <div class="content-area">
         <router-view />
       </div>
       <AppFooter />
     </main>
+    <LoginModal :isOpen="isLoginModalOpen" @close="isLoginModalOpen = false" />
   </div>
 </template>
 
@@ -15,17 +16,20 @@
 import AppHeader from './components/Layout/AppHeader.vue';
 import AppSidebar from './components/Layout/AppSidebar.vue';
 import AppFooter from './components/Layout/AppFooter.vue';
+import LoginModal from './components/LoginModal.vue';
 
 export default {
   name: 'App',
   components: {
     AppHeader,
     AppSidebar,
-    AppFooter
+    AppFooter,
+    LoginModal
   },
   data() {
     return {
-      isSidebarOpen: true
+      isSidebarOpen: true,
+      isLoginModalOpen: false
     }
   },
   methods: {

@@ -5,8 +5,9 @@
         <div class="nav-section">
           <ul class="nav-list">
             <li v-for="item in mainMenu" :key="item.name">
-              <router-link 
-                :to="item.path" 
+              <a 
+                href="#"
+                @click.prevent="handleItemClick(item)"
                 class="nav-item"
                 :class="{ 'nav-item--active': $route.path === item.path }"
                 :title="item.name"
@@ -20,7 +21,7 @@
                   />
                   <span class="nav-text">{{ item.name }}</span>
                 </div>
-              </router-link>
+              </a>
             </li>
           </ul>
         </div>
@@ -35,13 +36,42 @@ export default {
   props: {
     isOpen: Boolean
   },
+  emits: ['show-login'],
   data() {
     return {
       mainMenu: [
-        { name: 'Home', path: '/', icon: '/images/home.svg'},
-        { name: 'Akademik', path: '/akademik', icon: '/images/akademik.svg'},
-        { name: 'Kemahasiswaan', path: '/kemahasiswaan', icon: '/images/kemahasiswaan.svg'},
-      ]
+        { name: 'Home', path: '/', icon: '/images/home.svg', restricted: false},
+        { name: 'Akademik', path: '/akademik', icon: '/images/akademik.svg', restricted: true},
+        { name: 'Kemahasiswaan', path: '/kemahasiswaan', icon: '/images/kemahasiswaan.svg', restricted: true},
+      ],
+      isAuthenticated: false
+    }
+  },
+  mounted() {
+    // Check authentication on mount
+    this.checkAuth()
+    
+    // Listen for auth changes
+    window.addEventListener('auth-changed', this.checkAuth)
+  },
+  beforeUnmount() {
+    window.removeEventListener('auth-changed', this.checkAuth)
+  },
+  methods: {
+    checkAuth() {
+      const token = localStorage.getItem('auth_token')
+      this.isAuthenticated = !!token // Convert to boolean
+    },
+    handleItemClick(item) {
+      // If page is restricted and user is NOT authenticated, show login
+      if (item.restricted && !this.isAuthenticated) {
+        this.$emit('show-login');
+      } else {
+        // User is authenticated OR page is not restricted, navigate
+        if (this.$route.path !== item.path) {
+          this.$router.push(item.path);
+        }
+      }
     }
   }
 }
@@ -110,6 +140,9 @@ export default {
   transition: background var(--transition-normal), transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
   position: relative;
   border: 1px solid transparent;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 [data-theme="dark"] .nav-item {
