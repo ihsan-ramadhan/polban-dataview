@@ -8,9 +8,12 @@
           @click="$emit('toggle-sidebar')"
           aria-label="Toggle sidebar"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <img 
+            src="/images/menu.svg" 
+            alt="Menu"
+            width="20" 
+            height="20"
+          />
         </button>
         
         <div class="logo">
@@ -36,25 +39,31 @@
           :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
         >
           <transition name="theme-icon" mode="out-in">
-            <svg v-if="isDark" key="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="12" cy="12" r="5" stroke-width="2"/>
-              <line x1="12" y1="1" x2="12" y2="3" stroke-width="2" stroke-linecap="round"/>
-              <line x1="12" y1="21" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2" stroke-linecap="round"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2" stroke-linecap="round"/>
-              <line x1="1" y1="12" x2="3" y2="12" stroke-width="2" stroke-linecap="round"/>
-              <line x1="21" y1="12" x2="23" y2="12" stroke-width="2" stroke-linecap="round"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2" stroke-linecap="round"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <svg v-else key="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <img 
+              v-if="isDark" 
+              key="sun" 
+              src="/images/sun.svg"
+              alt="Light Mode"
+              width="20" 
+              height="20"
+            />
+            <img 
+              v-else 
+              key="moon" 
+              src="/images/moon.svg"
+              alt="Dark Mode"
+              width="20" 
+              height="20"
+            />
           </transition>
         </button>
 
-        <div class="user-menu">
-          <button class="user-button">
+        <div class="user-menu" v-click-outside="closeDropdown">
+          <button 
+            class="user-button" 
+            @click="toggleDropdown"
+            :class="{ 'active': isDropdownOpen }"
+          >
             <div class="user-avatar">
               <img 
                 src="/images/profile/user-avatar.png" 
@@ -63,14 +72,47 @@
               />
             </div>
             <div class="user-info">
-              <span class="user-name">Guest</span>
+              <span class="user-name">{{ userName }}</span>
             </div>
             <img 
               src="/images/arrow-v.png"   
               alt="Arrow Down"
               class="user-arrow"
+              :class="{ 'rotated': isDropdownOpen }"
             />
           </button>
+
+          <transition name="dropdown">
+            <div v-if="isDropdownOpen" class="user-dropdown">
+              <div class="dropdown-content">
+                <!-- Show LOGIN if not authenticated -->
+                <button v-if="!isAuthenticated" class="login-btn" @click="handleLoginClick">
+                  <span class="login-icon">
+                    <img 
+                      src="/images/auth.svg" 
+                      alt="Login"
+                      width="20" 
+                      height="20"
+                    />
+                  </span>
+                  Login
+                </button>
+                
+                <!-- Show LOGOUT if authenticated -->
+                <button v-else class="logout-btn" @click="handleLogout">
+                  <span class="logout-icon">
+                    <img 
+                      src="/images/auth.svg" 
+                      alt="Logout"
+                      width="20" 
+                      height="20"
+                    />
+                  </span>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
     </div>
@@ -80,10 +122,30 @@
 <script>
 export default {
   name: 'AppHeader',
-  emits: ['toggle-sidebar'],
+
+  emits: ['toggle-sidebar', 'show-login', 'auth-changed'],
+  directives: {
+    'click-outside': {
+      mounted(el, binding) {
+        el.clickOutsideEvent = function(event) {
+          if (!(el === event.target || el.contains(event.target))) {
+            binding.value(event, el);
+          }
+        };
+        document.body.addEventListener('click', el.clickOutsideEvent);
+      },
+      unmounted(el) {
+        document.body.removeEventListener('click', el.clickOutsideEvent);
+      }
+    }
+  },
   data() {
     return {
-      isDark: false
+      isDark: false,
+      isDropdownOpen: false,
+      isAuthenticated: false,
+      userName: 'Guest',
+      userData: null
     }
   },
   mounted() {
@@ -92,8 +154,62 @@ export default {
     
     this.isDark = savedTheme === 'dark' || (!savedTheme && prefersDark)
     this.applyTheme()
+    
+    // Check authentication status
+    this.checkAuth()
+    
+    // Listen for storage changes (when user logs in from LoginModal)
+    window.addEventListener('storage', this.checkAuth)
+    // Listen for custom event from LoginModal
+    window.addEventListener('auth-changed', this.checkAuth)
+  },
+  beforeUnmount() {
+    window.removeEventListener('storage', this.checkAuth)
+    window.removeEventListener('auth-changed', this.checkAuth)
   },
   methods: {
+    checkAuth() {
+      const token = localStorage.getItem('auth_token')
+      const userDataStr = localStorage.getItem('user_data')
+      
+      if (token && userDataStr) {
+        try {
+          this.userData = JSON.parse(userDataStr)
+          this.userName = this.userData.name || 'User'
+          this.isAuthenticated = true
+        } catch (e) {
+          console.error('Error parsing user data:', e)
+          this.resetAuth()
+        }
+      } else {
+        this.resetAuth()
+      }
+    },
+    resetAuth() {
+      this.isAuthenticated = false
+      this.userName = 'Guest'
+      this.userData = null
+    },
+    handleLogout() {
+      // Clear localStorage
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_data')
+      
+      // Reset state
+      this.resetAuth()
+      this.closeDropdown()
+      
+      // Emit event untuk notify components lain
+      this.$emit('auth-changed', false)
+      window.dispatchEvent(new CustomEvent('auth-changed'))
+      
+      // Redirect ke home
+      if (this.$route.path !== '/') {
+        this.$router.push('/')
+      }
+      
+      console.log('✅ Logout berhasil')
+    },
     toggleTheme() {
       this.isDark = !this.isDark
       this.applyTheme()
@@ -105,6 +221,16 @@ export default {
       } else {
         document.documentElement.removeAttribute('data-theme')
       }
+    },
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen
+    },
+    closeDropdown() {
+      this.isDropdownOpen = false
+    },
+    handleLoginClick() {
+      this.$emit('show-login')
+      this.closeDropdown()
     }
   }
 }
@@ -356,6 +482,98 @@ export default {
 
 .user-button:hover .user-arrow {
   opacity: 1;
+}
+
+.user-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 180px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-4);
+  z-index: 100;
+  transform-origin: top right;
+}
+
+[data-theme="dark"] .user-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dropdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login-btn,
+.logout-btn {
+  width: 100%;
+  padding: var(--space-3);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  transition: all 0.2s ease;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  box-shadow: 0 4px 12px rgba(246, 152, 62, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(246, 152, 62, 0.4);
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.login-btn:active,
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+.login-icon,
+.logout-icon {
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
 }
 
 @media (max-width: 1024px) {
