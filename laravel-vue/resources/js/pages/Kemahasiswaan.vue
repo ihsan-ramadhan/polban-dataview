@@ -40,6 +40,12 @@
                             Perbandingan Laki-laki dan Perempuan
                         </p>
                     </div>
+                    <div class="chart-filters">
+                        <select v-model="filters.gender.angkatan" @change="fetchGenderData" class="filter-select">
+                            <option value="">Semua Angkatan</option>
+                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-container">
                     <div v-if="isLoadingGender" class="state-container loading">
@@ -63,6 +69,12 @@
                     <div class="card-header">
                         <h2 class="chart-title">Persebaran Agama</h2>
                         <p class="chart-subtitle">Statistik Agama Mahasiswa</p>
+                    </div>
+                    <div class="chart-filters">
+                        <select v-model="filters.agama.angkatan" @change="fetchAgamaData" class="filter-select">
+                            <option value="">Semua Angkatan</option>
+                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
+                        </select>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -89,6 +101,12 @@
                         <p class="chart-subtitle">
                             Jalur Masuk Berdasarkan Jenis Sekolah
                         </p>
+                    </div>
+                    <div class="chart-filters">
+                        <select v-model="filters.slta.angkatan" @change="fetchSLTAData" class="filter-select">
+                            <option value="">Semua Angkatan</option>
+                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
+                        </select>
                     </div>
                 </div>
                 <div class="chart-container-wide">
@@ -469,6 +487,27 @@ export default {
 .chart-subtitle {
     font-size: 0.8rem;
     color: var(--text-tertiary);
+}
+
+.chart-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    border-color: var(--color-primary);
 }
 
 /* Penyesuaian tinggi chart containers agar sesuai dengan layout asimetris */
