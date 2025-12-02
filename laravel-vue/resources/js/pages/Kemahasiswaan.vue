@@ -97,9 +97,9 @@
             <div class="chart-card slta-card">
                 <div class="card-header-wrapper">
                     <div class="card-header">
-                        <h2 class="chart-title">Asal Sekolah (SLTA)</h2>
+                        <h2 class="chart-title">Asal Jenis Sekolah (SLTA)</h2>
                         <p class="chart-subtitle">
-                            Jalur Masuk Berdasarkan Jenis Sekolah
+                            Statistik Berdasarkan Asal Jenis Sekolah
                         </p>
                     </div>
                     <div class="chart-filters">
@@ -123,15 +123,20 @@
                         v-else-if="sltaChartData"
                         :chart-data="sltaChartData"
                     />
-                </div>
-            </div>
-        </div>
+                </div>                        
+            </div>   
+        </div>    
     </div>
+    <button @click="generatePDF" class="pdf-button">
+        <span class="pdf-icon">📄</span> Simpan sebagai PDF
+    </button>
 </template>
 
 <script>
 import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BasePieChart from "../components/Charts/BasePieChart.vue";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -399,6 +404,54 @@ export default {
             });
             return Array.from(map.values());
         },
+
+        async generatePDF() {
+            // 1. Dapatkan elemen yang ingin dijadikan PDF (container grid)
+            const input = document.querySelector('.charts-grid');
+            if (!input) {
+                console.error("Elemen .charts-grid tidak ditemukan!");
+                return;
+            }
+
+            try {
+                // 2. Gunakan html2canvas untuk mengubah elemen HTML menjadi gambar (canvas)
+                const canvas = await html2canvas(input, {
+                    // Opsi untuk memastikan rendering yang baik
+                    scale: 2, 
+                    useCORS: true,
+                    allowTaint: true 
+                });
+
+                // 3. Konfigurasi jsPDF
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // Lebar A4 dalam mm
+                const pageHeight = 297; // Tinggi A4 dalam mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                
+                // Buat instance PDF baru (A4, orientasi Portrait)
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                let position = 0;
+
+                // Tambahkan halaman jika gambar terlalu panjang (membutuhkan lebih dari 1 halaman)
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                // 4. Simpan file PDF
+                pdf.save('Statistik_Kemahasiswaan_Polban.pdf');
+                
+            } catch (error) {
+                console.error("Gagal membuat PDF:", error);
+                alert("Gagal menyimpan PDF. Periksa konsol untuk detailnya.");
+            }
+        },
     },
 };
 </script>
@@ -620,5 +673,36 @@ export default {
     .chart-container {
         height: 350px !important; /* Standar yang sama untuk semua di mode 1 kolom */
     }
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.pdf-button {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background-color: #EF4444; 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.pdf-button:hover {
+    background-color: #DC2626;
+}
+
+.pdf-icon {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
 }
 </style>
