@@ -9,19 +9,11 @@
             Data dan visualisasi terkait aktivitas akademik Politeknik Negeri Bandung.
           </p>
         </div>
-        
-        <button 
-          class="btn-export-all" 
-          @click="downloadOnePageReport" 
-          :disabled="isLoading || !chartDataHasData || isGeneratingPdf"
-          data-html2canvas-ignore="true"
-        >
-          <span v-if="isGeneratingPdf">Memproses PDF...</span>
-          <span v-else>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download Laporan PDF(1 Halaman)
-          </span>
-        </button>
+        <PdfReportButton 
+          :target-element="$refs.pageContainer" 
+          file-name="Laporan-Akademik"
+          :disabled="isLoading || !chartDataHasData"
+        />
       </div>
     </div>
 
@@ -56,10 +48,7 @@
         </div>
 
         <div class="download-action-area" v-if="!isLoading && chartDataHasData">
-           <ChartDownloadButton 
-              :target-element="$refs.chartCardPie" 
-              file-name="PieChart-TipeTes" 
-           />
+           <ChartDownloadButton :target-element="$refs.chartCardPie" file-name="PieChart-TipeTes" />
         </div>
       </div>
 
@@ -77,10 +66,7 @@
         </div>
 
         <div class="download-action-area" v-if="!isLoading && chartDataHasData">
-           <ChartDownloadButton 
-              :target-element="$refs.chartCardBar" 
-              file-name="BarChart-RataNilai" 
-           />
+           <ChartDownloadButton :target-element="$refs.chartCardBar" file-name="BarChart-RataNilai" />
         </div>
       </div>
     </div> 
@@ -100,10 +86,7 @@
             </div>
 
             <div class="download-action-area" v-if="!isLoading && chartDataHasData">
-               <ChartDownloadButton 
-                  :target-element="$refs.chartCardTren" 
-                  file-name="BarChart-TrenIP" 
-               />
+               <ChartDownloadButton :target-element="$refs.chartCardTren" file-name="BarChart-TrenIP" />
             </div>
         </div>
     </div>
@@ -113,11 +96,10 @@
 <script>
 import BasePieChart from "../../components/Charts/BasePieChart.vue";
 import BaseBarChart from "../../components/Charts/BaseBarChart.vue";
-// Import Component Tombol Download
-import ChartDownloadButton from "../../components/Shared/ChartDownloadButton.vue";
 
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+// Import 2 Component Shared Kita
+import ChartDownloadButton from "../../components/Shared/ChartDownloadButton.vue";
+import PdfReportButton from "../../components/Shared/PdfReportButton.vue";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -126,7 +108,8 @@ export default {
   components: {
     BasePieChart,
     BaseBarChart,
-    ChartDownloadButton, // Jangan lupa didaftarkan
+    ChartDownloadButton, // Untuk PNG per chart
+    PdfReportButton,     // Untuk PDF full report
   },
   data() {
     return {
@@ -136,7 +119,6 @@ export default {
       filters: { angkatan: "" },
       angkatanList: [2023, 2024, 2025],
       showAngkatanDropdown: false,
-      isGeneratingPdf: false,
     };
   },
   computed: {
@@ -148,48 +130,6 @@ export default {
     this.fetchData();
   },
   methods: {
-    // --- FITUR DOWNLOAD PDF GLOBAL (1 Halaman) ---
-    async downloadOnePageReport() {
-      this.isGeneratingPdf = true;
-      try {
-        const elementToCapture = this.$refs.pageContainer;
-        const canvas = await html2canvas(elementToCapture, {
-          scale: 2, 
-          useCORS: true,
-          backgroundColor: '#ffffff' 
-        });
-
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = doc.internal.pageSize.getHeight();
-        
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-        const margin = 10;
-        const usableWidth = pdfWidth - (margin * 2);
-        const usableHeight = pdfHeight - (margin * 2);
-
-        const widthRatio = usableWidth / imgWidth;
-        const heightRatio = usableHeight / imgHeight;
-        const scaleFactor = Math.min(widthRatio, heightRatio);
-
-        const finalWidth = imgWidth * scaleFactor;
-        const finalHeight = imgHeight * scaleFactor;
-        const xPos = (pdfWidth - finalWidth) / 2;
-        const yPos = (pdfHeight - finalHeight) / 2;
-
-        const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
-        doc.save(`Laporan-Akademik-OnePage-${Date.now()}.pdf`);
-      } catch (err) {
-        console.error("Gagal export PDF:", err);
-        alert("Gagal membuat PDF.");
-      } finally {
-        this.isGeneratingPdf = false;
-      }
-    },
-
-    // --- FETCH DATA ---
     async fetchData() {
       this.isLoading = true;
       this.error = null;
@@ -282,24 +222,6 @@ export default {
 .page-title { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
 .page-subtitle { font-size: 1rem; color: var(--text-secondary); }
 
-/* Tombol Export Utama */
-.btn-export-all {
-  display: flex;
-  align-items: center;
-  background-color: var(--color-primary, #007bff);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-.btn-export-all:hover { background-color: var(--color-primary-dark, #0056b3); transform: translateY(-1px); }
-.btn-export-all:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-
 /* Grid Layout */
 .dashboard-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
 .dashboard-full-row { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
@@ -336,51 +258,15 @@ export default {
 .filter-select-styled:hover { border-color: var(--color-primary); background: var(--bg-hover);}
 .dropdown-arrow { font-size: 0.7rem; margin-left: 8px; color: var(--text-tertiary); }
 
-/* --- STYLE DROPDOWN (Fixed for Perfectionist) --- */
-
 .dropdown-menu {
-  position: absolute;
-  
-  /* 1. JARAK VISUAL YANG RAPI */
-  /* Turunkan menu 8px ke bawah tombol. Memberi efek 'floating' yang elegan. */
-  top: calc(100% + 8px); 
-  left: 0;
-  
-  /* Style Kotak */
-  background: var(--bg-secondary); 
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12); /* Shadow halus */
-  min-width: 200px;
-  z-index: 999;
-  padding: 8px 0;
-  
-  /* Animasi halus saat muncul (Opsional, biar makin smooth) */
-  animation: fadeIn 0.2s ease-out;
+  position: absolute; top: calc(100% + 8px); left: 0; 
+  background: var(--bg-secondary); border: 1px solid var(--border-color);
+  border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  min-width: 200px; z-index: 999; overflow: visible; padding: 8px 0;
 }
-
-/* 2. JEMBATAN GHAIB (INVISIBLE BRIDGE) */
-/* Buat kotak transparan di celah antara tombol dan menu.
-   Jadi saat mouse kamu menyebrang celah 8px itu, mouse dianggap masih nempel. */
 .dropdown-menu::before {
-  content: "";
-  position: absolute;
-  
-  /* Mulai dari atas menu, tarik ke atas setinggi 20px untuk menutupi celah */
-  top: -20px; 
-  left: 0;
-  width: 100%;
-  height: 20px;
-  
-  background: transparent; /* Transparan, user gak liat */
-  /* background: red; /* <-- Uncomment ini kalau mau liat jembatannya */
-  z-index: -1;
-}
-
-/* Keyframes untuk animasi muncul */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  content: ""; position: absolute; top: -20px; left: 0;
+  width: 100%; height: 20px; background: transparent; z-index: -1;
 }
 
 .dropdown-item {
