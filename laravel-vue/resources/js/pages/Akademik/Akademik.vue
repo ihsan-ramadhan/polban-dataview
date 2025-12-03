@@ -122,7 +122,6 @@
 <script>
 import BasePieChart from "../../components/Charts/BasePieChart.vue";
 import BaseBarChart from "../../components/Charts/BaseBarChart.vue";
-// Pastikan Component ini sudah mode "PNG Only" seperti request sebelumnya
 import ChartDownloadButton from "../../components/Shared/ChartDownloadButton.vue";
 
 import html2canvas from "html2canvas";
@@ -142,7 +141,7 @@ export default {
       chartData: null,
       isLoading: true,
       error: null,
-      // Render Key untuk memaksa update chart
+      // Render Key: Ini rahasia animasinya!
       renderKey: 0,
       
       filters: { angkatan: "" },
@@ -160,7 +159,6 @@ export default {
     this.fetchData();
   },
   methods: {
-    // --- FITUR DOWNLOAD PDF GLOBAL (1 Halaman) ---
     async downloadOnePageReport() {
       this.isGeneratingPdf = true;
       try {
@@ -201,7 +199,6 @@ export default {
       }
     },
 
-    // --- FETCH DATA ---
     async fetchData() {
       this.isLoading = true;
       this.error = null;
@@ -233,7 +230,7 @@ export default {
           datasets: [{ label: "Jumlah Mahasiswa", backgroundColor: colors, data: processedData.values, borderWidth: 1 }],
         };
 
-        // --- KEY FIX: Increment Key agar chart dirender ulang ---
+        // --- PENTING: Update key untuk memicu animasi ulang ---
         this.renderKey += 1; 
 
       } catch (error) {
