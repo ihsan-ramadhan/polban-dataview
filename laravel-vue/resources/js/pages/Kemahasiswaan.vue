@@ -1,11 +1,16 @@
 <template>
-  <div class="kemahasiswaan-page">
-    <div class="page-header">
-      <h1>Statistik Kemahasiswaan Polban</h1>
-      <p>Menampilkan visual data dan karakteristik mahasiswa Jurusan Teknik Komputer dan Informatika berdasarkan angkatan serta kelas.</p>
-    </div>
+    <div class="kemahasiswaan-page">
+        <div class="page-header">
+            <div class="header-content">
+                <h1>Statistik Kemahasiswaan Polban </h1>  
+                <button @click="generatePDF" class="pdf-button">
+                    <span class="pdf-icon">📄</span> Simpan sebagai PDF
+                </button>         
+            </div>
+            <p>Menampilkan visual data dan karakteristik mahasiswa Jurusan Teknik Komputer dan Informatika berdasarkan angkatan serta kelas.</p>                             
+        </div>
 
-    <div class="charts-grid">
+        <div class="charts-grid">
             <div class="chart-card jumlah-mahasiswa-card">
                 <div class="card-header-wrapper">
                     <div class="card-header">
@@ -13,7 +18,7 @@
                         <p class="chart-subtitle">Total Mahasiswa Aktif per Angkatan</p>
                     </div>
                     <div class="chart-filters">
-                        </div>
+                    </div>
                 </div>
                 <div class="chart-container-large">
                     <div v-if="isLoadingJumlah" class="state-container loading">
@@ -41,10 +46,12 @@
                         </p>
                     </div>
                     <div class="chart-filters">
-                        <select v-model="filters.gender.angkatan" @change="fetchGenderData" class="filter-select">
-                            <option value="">Semua Angkatan</option>
-                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
-                        </select>
+                        <AngkatanDropdown
+                            v-model="filters.gender.angkatan"
+                            :options="angkatanList"
+                            @change="fetchGenderData"
+                            placeholder="Semua Angkatan"
+                        />
                     </div>
                 </div>
                 <div class="chart-container">
@@ -71,10 +78,12 @@
                         <p class="chart-subtitle">Statistik Agama Mahasiswa</p>
                     </div>
                     <div class="chart-filters">
-                        <select v-model="filters.agama.angkatan" @change="fetchAgamaData" class="filter-select">
-                            <option value="">Semua Angkatan</option>
-                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
-                        </select>
+                        <AngkatanDropdown
+                            v-model="filters.agama.angkatan"
+                            :options="angkatanList"
+                            @change="fetchAgamaData"
+                            placeholder="Semua Angkatan"
+                        />
                     </div>
                 </div>
                 <div class="chart-container">
@@ -103,10 +112,12 @@
                         </p>
                     </div>
                     <div class="chart-filters">
-                        <select v-model="filters.slta.angkatan" @change="fetchSLTAData" class="filter-select">
-                            <option value="">Semua Angkatan</option>
-                            <option v-for="year in angkatanList" :key="year" :value="year">{{ year }}</option>
-                        </select>
+                        <AngkatanDropdown
+                            v-model="filters.slta.angkatan"
+                            :options="angkatanList"
+                            @change="fetchSLTAData"
+                            placeholder="Semua Angkatan"
+                        />
                     </div>
                 </div>
                 <div class="chart-container-wide">
@@ -123,13 +134,10 @@
                         v-else-if="sltaChartData"
                         :chart-data="sltaChartData"
                     />
-                </div>                        
-            </div>   
-        </div>    
+                </div>
+            </div>
+        </div>
     </div>
-    <button @click="generatePDF" class="pdf-button">
-        <span class="pdf-icon">📄</span> Simpan sebagai PDF
-    </button>
 </template>
 
 <script>
@@ -137,6 +145,8 @@ import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BasePieChart from "../components/Charts/BasePieChart.vue";
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+// 1. IMPORT KOMPONEN FILTER BARU
+import AngkatanDropdown from "../components/Shared/AngkatanDropdown.vue"; // Sesuaikan path jika perlu
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -145,6 +155,7 @@ export default {
     components: {
         BaseBarChart,
         BasePieChart,
+        AngkatanDropdown, // 2. Daftarkan komponen baru
     },
     data() {
         return {
@@ -238,10 +249,10 @@ export default {
                     datasets: [
                         {
                             label: "Total Mahasiswa",
-                            backgroundColor:  ["#08519c", "#42A5F5", "#6BAED6"],
+                            backgroundColor: ["#08519c", "#42A5F5", "#6BAED6"],
                             data: rawData.map((item) => item.total),
                             borderRadius: 6,
-                            barThickness: 30,
+                            barThickness: 50,
                         },
                     ],
                 };
@@ -365,7 +376,7 @@ export default {
                             backgroundColor: colors.slice(0, rawData.length),
                             data: rawData.map((item) => item.total),
                             borderRadius: 6,
-                            barThickness: 40,
+                            barThickness: 80,
                         },
                     ],
                 };
@@ -406,7 +417,6 @@ export default {
         },
 
         async generatePDF() {
-            // 1. Dapatkan elemen yang ingin dijadikan PDF (container grid)
             const input = document.querySelector('.charts-grid');
             if (!input) {
                 console.error("Elemen .charts-grid tidak ditemukan!");
@@ -414,26 +424,21 @@ export default {
             }
 
             try {
-                // 2. Gunakan html2canvas untuk mengubah elemen HTML menjadi gambar (canvas)
                 const canvas = await html2canvas(input, {
-                    // Opsi untuk memastikan rendering yang baik
                     scale: 2, 
                     useCORS: true,
                     allowTaint: true 
                 });
 
-                // 3. Konfigurasi jsPDF
                 const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 210; // Lebar A4 dalam mm
-                const pageHeight = 297; // Tinggi A4 dalam mm
+                const imgWidth = 210; 
+                const pageHeight = 297; 
                 const imgHeight = canvas.height * imgWidth / canvas.width;
                 let heightLeft = imgHeight;
                 
-                // Buat instance PDF baru (A4, orientasi Portrait)
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 let position = 0;
 
-                // Tambahkan halaman jika gambar terlalu panjang (membutuhkan lebih dari 1 halaman)
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
 
@@ -444,7 +449,6 @@ export default {
                     heightLeft -= pageHeight;
                 }
 
-                // 4. Simpan file PDF
                 pdf.save('Statistik_Kemahasiswaan_Polban.pdf');
                 
             } catch (error) {
@@ -470,16 +474,19 @@ export default {
     margin-bottom: 2rem;
 }
 
-.page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    gap: 1.5rem; 
     margin-bottom: 0.5rem;
 }
 
-.page-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
+.page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0; 
 }
 
 /* --- GRID LAYOUT ASIMETRIS --- */
@@ -502,8 +509,6 @@ export default {
   grid-row: 3 / span 1;
   grid-column: 1 / span 2; 
 }
-/* Card ke-2 (Gender) dan ke-3 (Agama) akan mengisi Baris 1 & 2 di Kolom 2 secara otomatis. */
-
 
 .chart-card {
     background: var(--bg-secondary);
@@ -513,7 +518,6 @@ export default {
     border: 1px solid var(--border-color);
     min-width: 0;
     
-    /* Penting untuk Grid: Memastikan konten didalamnya terdorong ke bawah */
     display: flex;
     flex-direction: column;
 }
@@ -547,43 +551,24 @@ export default {
     gap: 0.5rem;
 }
 
-.filter-select {
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 0.85rem;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    cursor: pointer;
-    outline: none;
-    min-width: 150px;
-}
-
-.filter-select:focus {
-    border-color: var(--color-primary);
-}
 
 /* Penyesuaian tinggi chart containers agar sesuai dengan layout asimetris */
 .chart-container {
     position: relative;
-    /* Tinggi standar untuk chart 1x1 */
     height: 250px; 
     width: 100%;
     flex-grow: 1; 
-    margin-bottom: 1rem; /* Jarak sebelum detail link/footer */
+    margin-bottom: 1rem; 
 }
 
-/* Container untuk card yang membentang 2 baris (Jumlah Mahasiswa) */
 .chart-container-large {
     position: relative;
-    /* Tinggi yang diperkirakan untuk 2x tinggi chart biasa */
     height: 570px; 
     width: 100%;
     flex-grow: 1;
     margin-bottom: 1rem; 
 }
 
-/* Container untuk card yang membentang 2 kolom (SLTA) */
 .chart-container-wide {
     position: relative;
     height: 350px; 
@@ -591,21 +576,6 @@ export default {
     flex-grow: 1;
     margin-bottom: 1rem; 
 }
-
-
-/* Footer/Detail Link Style */
-.detail-link {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-primary); 
-    text-decoration: none;
-    margin-top: auto; 
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-color);
-    display: inline-block;
-    align-self: flex-start;
-}
-
 
 /* State Containers (Loading, Error) */
 .state-container {
@@ -653,7 +623,6 @@ export default {
     }
 }
 
-
 /* Responsif */
 @media (max-width: 992px) {
   .charts-grid {
@@ -667,42 +636,10 @@ export default {
     grid-column: auto;
   }
     
-    /* Mengatur ulang tinggi container di mode responsif */
     .chart-container-large,
     .chart-container-wide,
     .chart-container {
-        height: 350px !important; /* Standar yang sama untuk semua di mode 1 kolom */
+        height: 350px !important; 
     }
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.pdf-button {
-    display: flex;
-    align-items: center;
-    padding: 0.6rem 1rem;
-    background-color: #EF4444; 
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.pdf-button:hover {
-    background-color: #DC2626;
-}
-
-.pdf-icon {
-    margin-right: 0.5rem;
-    font-size: 1.1rem;
 }
 </style>
