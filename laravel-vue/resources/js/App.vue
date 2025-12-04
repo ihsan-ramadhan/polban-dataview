@@ -4,7 +4,11 @@
     <AppSidebar :isOpen="isSidebarOpen" @show-login="isLoginModalOpen = true" />
     <main class="main-content" :class="{ 'main-expanded': !isSidebarOpen }">
       <div class="content-area">
-        <router-view />
+        <router-view v-slot="{Component}">
+          <transition name="slide-fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
       <AppFooter />
     </main>
@@ -80,5 +84,19 @@ export default {
   .content-area {
     padding: var(--space-4);
   }
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 </style>
