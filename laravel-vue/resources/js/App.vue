@@ -4,11 +4,16 @@
     <AppSidebar :isOpen="isSidebarOpen" @show-login="isLoginModalOpen = true" />
     <main class="main-content" :class="{ 'main-expanded': !isSidebarOpen }">
       <div class="content-area">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition name="slide-fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
       <AppFooter />
     </main>
     <LoginModal :isOpen="isLoginModalOpen" @close="isLoginModalOpen = false" />
+    <ScrollToTop />
   </div>
 </template>
 
@@ -17,6 +22,7 @@ import AppHeader from './components/Layout/AppHeader.vue';
 import AppSidebar from './components/Layout/AppSidebar.vue';
 import AppFooter from './components/Layout/AppFooter.vue';
 import LoginModal from './components/LoginModal.vue';
+import ScrollToTop from './components/Button/BackToTop.vue';
 
 export default {
   name: 'App',
@@ -24,7 +30,8 @@ export default {
     AppHeader,
     AppSidebar,
     AppFooter,
-    LoginModal
+    LoginModal,
+    ScrollToTop
   },
   data() {
     return {
@@ -80,5 +87,19 @@ export default {
   .content-area {
     padding: var(--space-4);
   }
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 </style>
