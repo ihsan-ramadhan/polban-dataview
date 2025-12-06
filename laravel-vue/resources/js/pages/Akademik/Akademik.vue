@@ -105,7 +105,7 @@
             <div class="chart-card span-full" ref="chartCardTrenIP">
                 <div class="card-header">
                     <h2 class="chart-title">Tren IP</h2>
-                    <p class="chart-subtitle">Grafik ini memenuhi satu baris penuh</p>
+                    <p class="chart-subtitle">Grafik perkembangan IP per semester</p>
                 </div>
                 <div class="chart-container">
                     <div v-if="isLoadingTrenIP" class="state-container loading">
@@ -113,20 +113,20 @@
                     </div>
                     <div v-else-if="errorTrenIP" class="state-container error">
                         <p>{{ errorTrenIP }}</p>
-                        <button @click="fetchTrenIPData" class="retry-btn">
-                            Coba Lagi
-                        </button>
+                        <button @click="fetchTrenIPData" class="retry-btn">Coba Lagi</button>
                     </div>
-                    <BaseBarChart
+                    
+                    <BaseLineChart
                         v-else-if="trenIPChartData"
                         :chart-data="trenIPChartData"
+                        :options="{ responsive: true, maintainAspectRatio: false }"
                     />
                 </div>
 
                 <div class="download-action-area" v-if="!isLoadingTrenIP && trenIPChartData">
                     <ChartDownloadButton 
                         :target-element="$refs.chartCardTrenIP" 
-                        file-name="BarChart-TrenIP" 
+                        file-name="LineChart-TrenIP" 
                     />
                 </div>
             </div>
