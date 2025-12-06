@@ -1,24 +1,39 @@
 <template>
-    <div class="kemahasiswaan-page">
+    <div class="kemahasiswaan-page" ref="pageContainer">
         <div class="page-header">
             <div class="header-content">
-                <h1>Statistik Kemahasiswaan Polban </h1>  
-                <button @click="generatePDF" class="pdf-button">
-                    <span class="pdf-icon">📄</span> Simpan sebagai PDF
-                </button>         
+                <h1>Statistik Kemahasiswaan Polban </h1>
+                <button 
+                    class="btn-export-all" 
+                    @click="downloadOnePageReport" 
+                    :disabled="isGeneratingPdf"
+                    data-html2canvas-ignore="true"
+                >
+                    <span v-if="isGeneratingPdf">Memproses PDF...</span>
+                    <span v-else style="display: flex; align-items: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Download Laporan (PDF)
+                    </span>
+                </button>
             </div>
-            <p>Menampilkan visual data dan karakteristik mahasiswa Jurusan Teknik Komputer dan Informatika berdasarkan angkatan serta kelas.</p>                             
+            <p>Menampilkan visual data dan karakteristik mahasiswa Jurusan Teknik Komputer dan Informatika berdasarkan angkatan serta kelas.</p> 
         </div>
 
         <div class="charts-grid">
-            <div class="chart-card jumlah-mahasiswa-card">
+            <div class="chart-card jumlah-mahasiswa-card" ref="chartCardJumlah">
                 <div class="card-header-wrapper">
                     <div class="card-header">
                         <h2 class="chart-title">Jumlah Mahasiswa</h2>
                         <p class="chart-subtitle">Total Mahasiswa Aktif per Angkatan</p>
                     </div>
                     <div class="chart-filters">
-                    </div>
+                        </div>
                 </div>
                 <div class="chart-container-large">
                     <div v-if="isLoadingJumlah" class="state-container loading">
@@ -33,11 +48,18 @@
                     <BaseBarChart
                         v-else-if="jumlahChartData"
                         :chart-data="jumlahChartData"
+                        :key="filters.jumlah.angkatan" 
+                    />
+                </div>
+                <div class="download-action-area" v-if="!isLoadingJumlah && jumlahChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardJumlah" 
+                        file-name="BarChart-JumlahMahasiswa" 
                     />
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card" ref="chartCardGender">
                 <div class="card-header-wrapper">
                     <div class="card-header">
                         <h2 class="chart-title">Rasio Gender</h2>
@@ -45,7 +67,7 @@
                             Perbandingan Laki-laki dan Perempuan
                         </p>
                     </div>
-                    <div class="chart-filters">
+                    <div class="chart-filters" data-html2canvas-ignore="true">
                         <AngkatanDropdown
                             v-model="filters.gender.angkatan"
                             :options="angkatanList"
@@ -67,17 +89,24 @@
                     <BasePieChart
                         v-else-if="genderChartData"
                         :chart-data="genderChartData"
+                        :key="filters.gender.angkatan" 
+                    />
+                </div>
+                <div class="download-action-area" v-if="!isLoadingGender && genderChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardGender" 
+                        file-name="PieChart-RasioGender" 
                     />
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card" ref="chartCardAgama">
                 <div class="card-header-wrapper">
                     <div class="card-header">
                         <h2 class="chart-title">Persebaran Agama</h2>
                         <p class="chart-subtitle">Statistik Agama Mahasiswa</p>
                     </div>
-                    <div class="chart-filters">
+                    <div class="chart-filters" data-html2canvas-ignore="true">
                         <AngkatanDropdown
                             v-model="filters.agama.angkatan"
                             :options="angkatanList"
@@ -99,11 +128,18 @@
                     <BasePieChart
                         v-else-if="agamaChartData"
                         :chart-data="agamaChartData"
+                        :key="filters.agama.angkatan" 
+                    />
+                </div>
+                <div class="download-action-area" v-if="!isLoadingAgama && agamaChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardAgama" 
+                        file-name="PieChart-PersebaranAgama" 
                     />
                 </div>
             </div>
 
-            <div class="chart-card slta-card">
+            <div class="chart-card slta-card" ref="chartCardSLTA">
                 <div class="card-header-wrapper">
                     <div class="card-header">
                         <h2 class="chart-title">Asal Jenis Sekolah (SLTA)</h2>
@@ -111,7 +147,7 @@
                             Statistik Berdasarkan Asal Jenis Sekolah
                         </p>
                     </div>
-                    <div class="chart-filters">
+                    <div class="chart-filters" data-html2canvas-ignore="true">
                         <AngkatanDropdown
                             v-model="filters.slta.angkatan"
                             :options="angkatanList"
@@ -133,6 +169,13 @@
                     <BaseBarChart
                         v-else-if="sltaChartData"
                         :chart-data="sltaChartData"
+                        :key="filters.slta.angkatan" 
+                    />
+                </div>
+                <div class="download-action-area" v-if="!isLoadingSLTA && sltaChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardSLTA" 
+                        file-name="BarChart-JenisSLTA" 
                     />
                 </div>
             </div>
@@ -143,10 +186,11 @@
 <script>
 import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BasePieChart from "../components/Charts/BasePieChart.vue";
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-// 1. IMPORT KOMPONEN FILTER BARU
-import AngkatanDropdown from "../components/Shared/AngkatanDropdown.vue"; // Sesuaikan path jika perlu
+// Import aset yang diperlukan dari folder Shared/
+import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
+import AngkatanDropdown from "../components/Shared/AngkatanDropdown.vue"; 
+import html2canvas from 'html2canvas'; 
+import { jsPDF } from 'jspdf'; 
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -155,15 +199,14 @@ export default {
     components: {
         BaseBarChart,
         BasePieChart,
-        AngkatanDropdown, // 2. Daftarkan komponen baru
+        AngkatanDropdown,
+        ChartDownloadButton,
     },
     data() {
         return {
             // Hardcoded Lists
             angkatanList: [2023, 2024, 2025],
-            prodiList: [
-                "D3 Teknik Informatika"
-            ],
+            prodiList: ["D3 Teknik Informatika"],
 
             // Filters per Chart
             filters: {
@@ -173,25 +216,24 @@ export default {
                 slta: { angkatan: "" },
             },
 
-            // Jumlah Mahasiswa
+            // Data Charts & State
             jumlahChartData: null,
             isLoadingJumlah: true,
             errorJumlah: null,
 
-            // Gender
             genderChartData: null,
             isLoadingGender: true,
             errorGender: null,
 
-            // Agama
             agamaChartData: null,
             isLoadingAgama: true,
             errorAgama: null,
 
-            // SLTA
             sltaChartData: null,
             isLoadingSLTA: true,
             errorSLTA: null,
+            
+            isGeneratingPdf: false,
         };
     },
     mounted() {
@@ -211,10 +253,63 @@ export default {
             return params.toString();
         },
 
-        // 1. Jumlah Mahasiswa (Protected)
+        // --- LOGIC DOWNLOAD PDF GLOBAL (DARI AKADEMIK.VUE) ---
+        async downloadOnePageReport() {
+            this.isGeneratingPdf = true;
+            try {
+                // Target div utama dengan ref="pageContainer"
+                const elementToCapture = this.$refs.pageContainer;
+                const canvas = await html2canvas(elementToCapture, {
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    // Abaikan tombol download dan filter dropdown saat capture
+                    ignoreElements: (element) => {
+                        return element.hasAttribute('data-html2canvas-ignore');
+                    }
+                });
+
+                // Logic resizing ke A4 portrait
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = doc.internal.pageSize.getHeight();
+                
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const margin = 10;
+                const usableWidth = pdfWidth - (margin * 2);
+                const usableHeight = pdfHeight - (margin * 2);
+
+                const widthRatio = usableWidth / imgWidth;
+                const heightRatio = usableHeight / imgHeight;
+                const scaleFactor = Math.min(widthRatio, heightRatio);
+
+                const finalWidth = imgWidth * scaleFactor;
+                const finalHeight = imgHeight * scaleFactor;
+                const xPos = (pdfWidth - finalWidth) / 2;
+                const yPos = (pdfHeight - finalHeight) / 2;
+
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
+                doc.save(`Laporan-Kemahasiswaan-OnePage-${Date.now()}.pdf`);
+            } catch (err) {
+                console.error("Gagal export PDF:", err);
+                alert("Gagal membuat PDF.");
+            } finally {
+                this.isGeneratingPdf = false;
+            }
+        },
+
+        // Menambahkan method generatePDF yang memanggil downloadOnePageReport
+        generatePDF() {
+            this.downloadOnePageReport();
+        },
+
+        // 1. Jumlah Mahasiswa (Menambahkan Timeout)
         async fetchJumlahData() {
             this.isLoadingJumlah = true;
             this.errorJumlah = null;
+            await new Promise(resolve => setTimeout(resolve, 300)); 
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/v1/mahasiswa/jumlah-mahasiswa?${this.getQueryParams(this.filters.jumlah)}`,
@@ -226,22 +321,15 @@ export default {
                     }
                 );
                 if (response.status === 401 || response.status === 403) {
-                    throw new Error(
-                        "Akses Ditolak: Anda perlu login untuk melihat data ini."
-                    );
+                    throw new Error("Akses Ditolak: Anda perlu login untuk melihat data ini.");
                 }
                 if (!response.ok)
                     throw new Error(`Server Error: ${response.status}`);
                 let rawData = this.normalizeData(await response.json());
                 
-                // Aggregate by 'angkatan'
                 rawData = this.aggregateData(rawData, 'angkatan');
-
-                // Filter for years 2023, 2024, 2025
                 const targetYears = [2023, 2024, 2025];
                 rawData = rawData.filter(item => targetYears.includes(Number(item.angkatan)));
-                
-                // Sort by year
                 rawData.sort((a, b) => a.angkatan - b.angkatan);
 
                 this.jumlahChartData = {
@@ -264,10 +352,11 @@ export default {
             }
         },
 
-        // 2. Gender (Public -> Protected but bypassed)
+        // 2. Gender (Menambahkan Timeout)
         async fetchGenderData() {
             this.isLoadingGender = true;
             this.errorGender = null;
+            await new Promise(resolve => setTimeout(resolve, 300));
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/v1/mahasiswa/gender?${this.getQueryParams(this.filters.gender)}`,
@@ -302,10 +391,11 @@ export default {
             }
         },
 
-        // 3. Agama (Public -> Protected but bypassed)
+        // 3. Agama (Menambahkan Timeout)
         async fetchAgamaData() {
             this.isLoadingAgama = true;
             this.errorAgama = null;
+            await new Promise(resolve => setTimeout(resolve, 300)); 
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/v1/mahasiswa/agama?${this.getQueryParams(this.filters.agama)}`,
@@ -323,11 +413,7 @@ export default {
                     rawData = this.aggregateData(rawData, 'agama');
                 }
 
-                const colors = [
-                    "#3b82f6",
-                    "#FF6384",
-                    "#ef4444",
-                ];
+                const colors = [ "#3b82f6", "#FF6384", "#ef4444" ];
                 this.agamaChartData = {
                     labels: rawData.map((item) => item.agama),
                     datasets: [
@@ -346,10 +432,11 @@ export default {
             }
         },
 
-        // 4. SLTA (Public -> Protected but bypassed)
+        // 4. SLTA (Menambahkan Timeout)
         async fetchSLTAData() {
             this.isLoadingSLTA = true;
             this.errorSLTA = null;
+            await new Promise(resolve => setTimeout(resolve, 300)); 
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/v1/mahasiswa/jenis-slta?${this.getQueryParams(this.filters.slta)}`,
@@ -388,6 +475,7 @@ export default {
             }
         },
 
+        // Helper Methods
         normalizeData(responseData) {
             let rawData = responseData.data || responseData;
             if (responseData.payload) rawData = responseData.payload;
@@ -402,66 +490,22 @@ export default {
             const map = new Map();
             data.forEach((item) => {
                 const label = item[key];
-                if (!label) return; // Skip if key not found
+                if (!label) return; 
                 
                 if (!map.has(label)) {
-                    // Clone item to preserve other properties, reset total to 0 initially
                     map.set(label, { ...item, total: 0 });
                 }
                 
                 const entry = map.get(label);
-                // Ensure total is treated as a number
                 entry.total += Number(item.total || 0);
             });
             return Array.from(map.values());
-        },
-
-        async generatePDF() {
-            const input = document.querySelector('.charts-grid');
-            if (!input) {
-                console.error("Elemen .charts-grid tidak ditemukan!");
-                return;
-            }
-
-            try {
-                const canvas = await html2canvas(input, {
-                    scale: 2, 
-                    useCORS: true,
-                    allowTaint: true 
-                });
-
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 210; 
-                const pageHeight = 297; 
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
-                
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-
-                pdf.save('Statistik_Kemahasiswaan_Polban.pdf');
-                
-            } catch (error) {
-                console.error("Gagal membuat PDF:", error);
-                alert("Gagal menyimpan PDF. Periksa konsol untuk detailnya.");
-            }
         },
     },
 };
 </script>
 
 <style scoped>
-/* Asumsikan variabel CSS seperti --text-primary, --bg-secondary, dll. sudah didefinisikan secara global */
 
 .kemahasiswaan-page {
     width: 100%;
@@ -492,7 +536,6 @@ export default {
 /* --- GRID LAYOUT ASIMETRIS --- */
 .charts-grid {
     display: grid;
-    /* Dua kolom, dengan lebar yang sama */
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     margin-top: 1rem;
@@ -500,14 +543,14 @@ export default {
 
 /* 1. Jumlah Mahasiswa (Card pertama) */
 .charts-grid .chart-card:nth-child(1) {
-  grid-row: 1 / span 2; 
-  grid-column: 1 / span 1; 
+    grid-row: 1 / span 2; 
+    grid-column: 1 / span 1; 
 }
 
 /* 4. Jenis SLTA (Card keempat) */
 .charts-grid .chart-card:nth-child(4) {
-  grid-row: 3 / span 1;
-  grid-column: 1 / span 2; 
+    grid-row: 3 / span 1;
+    grid-column: 1 / span 2; 
 }
 
 .chart-card {
@@ -558,7 +601,6 @@ export default {
     height: 250px; 
     width: 100%;
     flex-grow: 1; 
-    margin-bottom: 1rem; 
 }
 
 .chart-container-large {
@@ -566,7 +608,6 @@ export default {
     height: 570px; 
     width: 100%;
     flex-grow: 1;
-    margin-bottom: 1rem; 
 }
 
 .chart-container-wide {
@@ -574,8 +615,17 @@ export default {
     height: 350px; 
     width: 100%;
     flex-grow: 1;
-    margin-bottom: 1rem; 
 }
+
+/* Download Action Area */
+.download-action-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem; 
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
 
 /* State Containers (Loading, Error) */
 .state-container {
@@ -623,19 +673,40 @@ export default {
     }
 }
 
+/* --- STYLE TOMBOL DOWNLOAD GLOBAL --- */
+.btn-export-all {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-banner, #007bff); 
+    color: white;
+    border: 1px solid var(--color-banner, #007bff);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+.btn-export-all:hover { background-color: var(--color-primary-hover, #0056b3); transform: translateY(-1px); }
+.btn-export-all:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
 /* Responsif */
 @media (max-width: 992px) {
-  .charts-grid {
-    grid-template-columns: 1fr; 
-  }
-  .charts-grid .chart-card:nth-child(1),
-  .charts-grid .chart-card:nth-child(2),
-  .charts-grid .chart-card:nth-child(3),
-  .charts-grid .chart-card:nth-child(4) {
-    grid-row: auto;
-    grid-column: auto;
-  }
+    .charts-grid {
+        grid-template-columns: 1fr; 
+    }
+    /* Menghapus penempatan grid asimetris di mobile */
+    .charts-grid .chart-card:nth-child(1),
+    .charts-grid .chart-card:nth-child(2),
+    .charts-grid .chart-card:nth-child(3),
+    .charts-grid .chart-card:nth-child(4) {
+        grid-row: auto;
+        grid-column: auto;
+    }
     
+    /* Standarisasi tinggi chart di mobile */
     .chart-container-large,
     .chart-container-wide,
     .chart-container {
