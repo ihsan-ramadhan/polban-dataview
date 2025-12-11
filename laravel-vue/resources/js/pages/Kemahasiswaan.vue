@@ -40,10 +40,13 @@
                     <div v-if="isLoadingJumlah" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorJumlah" class="state-container error">
-                        <p>{{ errorJumlah }}</p>
-                        <button @click="fetchJumlahData" class="retry-btn">Coba Lagi</button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorJumlah" 
+                        @retry="fetchJumlahData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!jumlahChartData || jumlahChartData.datasets[0].data.length === 0" 
+                    />
                     <BaseBarChart
                         v-else-if="jumlahChartData"
                         :chart-data="jumlahChartData"
@@ -65,7 +68,7 @@
                 </div>
                 
                 <div class="chart-filters" data-html2canvas-ignore="true">
-                    <div class="filter-dropdown" @mouseenter="showGenderDropdown = true" @mouseleave="showGenderDropdown = false">
+                    <div class="filter-dropdown" @mousedown="showGenderDropdown = true">
                         <div class="filter-select-styled">
                             {{ filters.gender.angkatan || 'Semua Angkatan' }}
                             <span class="dropdown-arrow">▼</span>
@@ -81,10 +84,13 @@
                     <div v-if="isLoadingGender" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorGender" class="state-container error">
-                        <p>{{ errorGender }}</p>
-                        <button @click="fetchGenderData" class="retry-btn">Coba Lagi</button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorGender" 
+                        @retry="fetchGenderData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!genderChartData || genderChartData.datasets[0].data.length === 0" 
+                    />
                     <BasePieChart
                         v-else-if="genderChartData"
                         :chart-data="genderChartData"
@@ -106,7 +112,7 @@
                 </div>
 
                 <div class="chart-filters" data-html2canvas-ignore="true">
-                    <div class="filter-dropdown" @mouseenter="showAgamaDropdown = true" @mouseleave="showAgamaDropdown = false">
+                    <div class="filter-dropdown" @mousedown="showAgamaDropdown = true">
                         <div class="filter-select-styled">
                             {{ filters.agama.angkatan || 'Semua Angkatan' }}
                             <span class="dropdown-arrow">▼</span>
@@ -122,10 +128,13 @@
                     <div v-if="isLoadingAgama" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorAgama" class="state-container error">
-                        <p>{{ errorAgama }}</p>
-                        <button @click="fetchAgamaData" class="retry-btn">Coba Lagi</button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorAgama" 
+                        @retry="fetchAgamaData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!agamaChartData || agamaChartData.datasets[0].data.length === 0" 
+                    />
                     <BasePieChart
                         v-else-if="agamaChartData"
                         :chart-data="agamaChartData"
@@ -147,7 +156,7 @@
                 </div>
 
                 <div class="chart-filters" data-html2canvas-ignore="true">
-                    <div class="filter-dropdown" @mouseenter="showSLTADropdown = true" @mouseleave="showSLTADropdown = false">
+                    <div class="filter-dropdown" @mousedown="showSLTADropdown = true">
                         <div class="filter-select-styled">
                             {{ filters.slta.angkatan || 'Semua Angkatan' }}
                             <span class="dropdown-arrow">▼</span>
@@ -163,10 +172,13 @@
                     <div v-if="isLoadingSLTA" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorSLTA" class="state-container error">
-                        <p>{{ errorSLTA }}</p>
-                        <button @click="fetchSLTAData" class="retry-btn">Coba Lagi</button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorSLTA" 
+                        @retry="fetchSLTAData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!sltaChartData || sltaChartData.datasets[0].data.length === 0" 
+                    />
                     <BaseBarChart
                         v-else-if="sltaChartData"
                         :chart-data="sltaChartData"
@@ -188,6 +200,8 @@
 import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BasePieChart from "../components/Charts/BasePieChart.vue";
 import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
+import ErrorState from "../components/Shared/ErrorState.vue";
+import EmptyState from "../components/Shared/EmptyState.vue";
 
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -200,6 +214,8 @@ export default {
         BaseBarChart,
         BasePieChart,
         ChartDownloadButton,
+        ErrorState,
+        EmptyState,
     },
     data() {
         return {
@@ -382,6 +398,7 @@ export default {
                         backgroundColor: colors.slice(0, rawData.length),
                         data: rawData.map(item => item.total),
                         borderRadius: 6,
+                        barThickness: 50,
                     }],
                 };
             } catch (error) {
@@ -601,23 +618,7 @@ export default {
     text-align: center;
 }
 
-.state-container.error {
-    color: #d32f2f;
-    background-color: #ffebee;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px dashed #d32f2f;
-}
 
-.retry-btn {
-    margin-top: 8px;
-    padding: 4px 12px;
-    background: white;
-    border: 1px solid #d32f2f;
-    color: #d32f2f;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 .loader-spinner {
     width: 20px;

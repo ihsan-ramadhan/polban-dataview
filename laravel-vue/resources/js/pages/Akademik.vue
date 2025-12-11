@@ -37,7 +37,7 @@
                 </div>
                 
                 <div class="chart-filters" data-html2canvas-ignore="true">
-                    <div class="filter-dropdown" @mouseenter="showAngkatanDropdown = true" @mouseleave="showAngkatanDropdown = false">
+                    <div class="filter-dropdown" @mousedown="showAngkatanDropdown = true">
                         <div class="filter-select-styled">
                             {{ getFilterLabel() }}
                             <span class="dropdown-arrow">▼</span>
@@ -53,12 +53,13 @@
                     <div v-if="isLoadingTipeTes" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorTipeTes" class="state-container error">
-                        <p>{{ errorTipeTes }}</p>
-                        <button @click="fetchTipeTesData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorTipeTes" 
+                        @retry="fetchTipeTesData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!tipeTesChartData || tipeTesChartData.datasets[0].data.length === 0" 
+                    />
                     <BasePieChart
                         v-else-if="tipeTesChartData"
                         :chart-data="tipeTesChartData"
@@ -80,6 +81,8 @@
 import BasePieChart from "../components/Charts/BasePieChart.vue";
 // BaseBarChart dihapus karena tidak digunakan lagi
 import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
+import ErrorState from "../components/Shared/ErrorState.vue";
+import EmptyState from "../components/Shared/EmptyState.vue";
 
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -91,6 +94,8 @@ export default {
     components: {
         BasePieChart,
         ChartDownloadButton,
+        ErrorState,
+        EmptyState,
     },
     data() {
         return {
@@ -380,23 +385,7 @@ export default {
     text-align: center;
 }
 
-.state-container.error {
-    color: #d32f2f;
-    background-color: #ffebee;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px dashed #d32f2f;
-}
 
-.retry-btn {
-    margin-top: 8px;
-    padding: 4px 12px;
-    background: white;
-    border: 1px solid #d32f2f;
-    color: #d32f2f;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 .loader-spinner {
     width: 20px;

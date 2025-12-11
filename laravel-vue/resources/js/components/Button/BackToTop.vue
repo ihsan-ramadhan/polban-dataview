@@ -53,7 +53,7 @@ export default {
   justify-content: center;
   box-shadow: var(--shadow-lg);
   transition: all 0.3s ease;
-  z-index: 99;
+  z-index: 9999;
 }
 
 .back-to-top:hover {

@@ -69,12 +69,13 @@
                     <div v-if="isLoadingGender" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorGender" class="state-container error">
-                        <p>{{ errorGender }}</p>
-                        <button @click="fetchGenderData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorGender" 
+                        @retry="fetchGenderData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!genderChartData || genderChartData.datasets[0].data.length === 0" 
+                    />
                     <BasePieChart
                         v-else-if="genderChartData"
                         :chart-data="genderChartData"
@@ -97,12 +98,13 @@
                     <div v-if="isLoadingSLTA" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorSLTA" class="state-container error">
-                        <p>{{ errorSLTA }}</p>
-                        <button @click="fetchSLTAData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorSLTA" 
+                        @retry="fetchSLTAData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!sltaChartData || sltaChartData.datasets[0].data.length === 0" 
+                    />
                     <BaseBarChart
                         v-else-if="sltaChartData"
                         :chart-data="sltaChartData"
@@ -125,13 +127,14 @@
                     <div v-if="isLoadingAgama" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorAgama" class="state-container error">
-                        <p>{{ errorAgama }}</p>
-                        <button @click="fetchAgamaData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
-                    <BaseBarChart
+                    <ErrorState 
+                        v-else-if="errorAgama" 
+                        @retry="fetchAgamaData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!agamaChartData || agamaChartData.datasets[0].data.length === 0" 
+                    />
+                    <BasePieChart
                         v-else-if="agamaChartData"
                         :chart-data="agamaChartData"
                     />
@@ -155,12 +158,13 @@
                     <div v-if="isLoadingDosen" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorDosen" class="state-container error">
-                        <p>{{ errorDosen }}</p>
-                        <button @click="fetchDosenData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorDosen" 
+                        @retry="fetchDosenData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!dosenChartData || dosenChartData.datasets[0].data.length === 0" 
+                    />
                     <BasePieChart
                         v-else-if="dosenChartData"
                         :chart-data="dosenChartData"
@@ -183,12 +187,13 @@
                     <div v-if="isLoadingTipe" class="state-container loading">
                         <span class="loader-spinner"></span> Memuat...
                     </div>
-                    <div v-else-if="errorTipe" class="state-container error">
-                        <p>{{ errorTipe }}</p>
-                        <button @click="fetchTipeData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                    <ErrorState 
+                        v-else-if="errorTipe" 
+                        @retry="fetchTipeData" 
+                    />
+                    <EmptyState 
+                        v-else-if="!tipeChartData || tipeChartData.datasets[0].data.length === 0" 
+                    />
                     <BaseBarChart
                         v-else-if="tipeChartData"
                         :chart-data="tipeChartData"
@@ -216,15 +221,13 @@
                     >
                         <span class="loader-spinner"></span> Memuat Peta...
                     </div>
-                    <div
+                    <ErrorState
                         v-else-if="errorDomisili"
-                        class="state-container error"
-                    >
-                        <p>{{ errorDomisili }}</p>
-                        <button @click="fetchDomisiliData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
+                        @retry="fetchDomisiliData"
+                    />
+                    <EmptyState 
+                        v-else-if="!domisiliData || domisiliData.length === 0" 
+                    />
                     <BaseMap
                         v-else-if="domisiliData"
                         :map-data="domisiliData"
@@ -248,6 +251,8 @@ import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BaseMap from "../components/Charts/BaseMap.vue";
 // Import komponen Download
 import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
+import ErrorState from "../components/Shared/ErrorState.vue";
+import EmptyState from "../components/Shared/EmptyState.vue";
 
 // Import untuk PDF
 import html2canvas from "html2canvas";
@@ -263,6 +268,8 @@ export default {
         BaseBarChart,
         BaseMap,
         ChartDownloadButton, // Register
+        ErrorState,
+        EmptyState,
     },
     data() {
         return {
@@ -566,9 +573,6 @@ export default {
                 const validData = rawData.filter(
                     (item) => item.geo && item.geo.lat && item.geo.lng
                 );
-                if (validData.length === 0)
-                    throw new Error("Data tidak memiliki koordinat (geo)");
-
                 this.domisiliData = validData;
             } catch (error) {
                 console.error("Domisili Error:", error);
@@ -593,7 +597,8 @@ export default {
                 const rawData = this.normalizeData(await response.json());
 
                 if (!rawData || rawData.length === 0) {
-                    throw new Error("Data jalur masuk kosong");
+                    this.tipeChartData = null;
+                    return;
                 }
 
                 const colors = [
@@ -858,23 +863,7 @@ export default {
     text-align: center;
 }
 
-.state-container.error {
-    color: #d32f2f;
-    background-color: #ffebee;
-    padding: var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px dashed #d32f2f;
-}
 
-.retry-btn {
-    margin-top: 8px;
-    padding: 4px 12px;
-    background: white;
-    border: 1px solid #d32f2f;
-    color: #d32f2f;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 .loader-spinner {
     width: 20px;
