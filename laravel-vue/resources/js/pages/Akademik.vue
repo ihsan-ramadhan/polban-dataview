@@ -30,7 +30,7 @@
         </div>
 
         <div class="charts-grid">
-            <div class="chart-card" ref="chartCardTipeTes">
+            <div class="chart-card span-full" ref="chartCardTipeTes">
                 <div class="card-header">
                     <h2 class="chart-title">Tipe Tes Masuk</h2>
                     <p class="chart-subtitle">Distribusi berdasarkan jalur masuk</p>
@@ -72,72 +72,14 @@
                     />
                 </div>
             </div>
-
-            <div class="chart-card" ref="chartCardRataNilai">
-                <div class="card-header">
-                    <h2 class="chart-title">Rata-Rata Nilai</h2>
-                    <p class="chart-subtitle">Data sementara (Tipe Tes Masuk)</p>
-                </div>
-                <div class="chart-container">
-                    <div v-if="isLoadingRataNilai" class="state-container loading">
-                        <span class="loader-spinner"></span> Memuat...
-                    </div>
-                    <div v-else-if="errorRataNilai" class="state-container error">
-                        <p>{{ errorRataNilai }}</p>
-                        <button @click="fetchRataNilaiData" class="retry-btn">
-                            Coba Lagi
-                        </button>
-                    </div>
-                    <BaseBarChart
-                        v-else-if="rataNilaiChartData"
-                        :chart-data="rataNilaiChartData"
-                    />
-                </div>
-
-                <div class="download-action-area" v-if="!isLoadingRataNilai && rataNilaiChartData">
-                    <ChartDownloadButton 
-                        :target-element="$refs.chartCardRataNilai" 
-                        file-name="BarChart-RataNilai" 
-                    />
-                </div>
-            </div>
-
-            <div class="chart-card span-full" ref="chartCardTrenIP">
-                <div class="card-header">
-                    <h2 class="chart-title">Tren IP</h2>
-                    <p class="chart-subtitle">Grafik perkembangan IP per semester</p>
-                </div>
-                <div class="chart-container">
-                    <div v-if="isLoadingTrenIP" class="state-container loading">
-                        <span class="loader-spinner"></span> Memuat...
-                    </div>
-                    <div v-else-if="errorTrenIP" class="state-container error">
-                        <p>{{ errorTrenIP }}</p>
-                        <button @click="fetchTrenIPData" class="retry-btn">Coba Lagi</button>
-                    </div>
-                    
-                    <BaseLineChart
-                        v-else-if="trenIPChartData"
-                        :chart-data="trenIPChartData"
-                        :options="{ responsive: true, maintainAspectRatio: false }"
-                    />
-                </div>
-
-                <div class="download-action-area" v-if="!isLoadingTrenIP && trenIPChartData">
-                    <ChartDownloadButton 
-                        :target-element="$refs.chartCardTrenIP" 
-                        file-name="LineChart-TrenIP" 
-                    />
-                </div>
-            </div>
         </div>
     </div>
 </template>
 
 <script>
-import BasePieChart from "../../components/Charts/BasePieChart.vue";
-import BaseBarChart from "../../components/Charts/BaseBarChart.vue";
-import ChartDownloadButton from "../../components/Shared/ChartDownloadButton.vue";
+import BasePieChart from "../components/Charts/BasePieChart.vue";
+// BaseBarChart dihapus karena tidak digunakan lagi
+import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
 
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -148,27 +90,21 @@ export default {
     name: "Akademik",
     components: {
         BasePieChart,
-        BaseBarChart,
         ChartDownloadButton,
     },
     data() {
         return {
+            // Data Tipe Tes
             tipeTesChartData: null,
             isLoadingTipeTes: true,
             errorTipeTes: null,
 
-            rataNilaiChartData: null,
-            isLoadingRataNilai: true,
-            errorRataNilai: null,
-
-            trenIPChartData: null,
-            isLoadingTrenIP: true,
-            errorTrenIP: null,
-
+            // Filter
             filters: { angkatan: "" },
             angkatanList: [2023, 2024, 2025],
             showAngkatanDropdown: false,
             
+            // PDF State
             isGeneratingPdf: false,
         };
     },
@@ -178,8 +114,7 @@ export default {
     methods: {
         fetchAllData() {
             this.fetchTipeTesData();
-            this.fetchRataNilaiData();
-            this.fetchTrenIPData();
+            // Pemanggilan fetchRataNilaiData dan fetchTrenIPData dihapus
         },
 
         async downloadOnePageReport() {
@@ -264,57 +199,8 @@ export default {
             }
         },
 
-        async fetchRataNilaiData() {
-            this.isLoadingRataNilai = true;
-            this.errorRataNilai = null;
-            try {
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                this.rataNilaiChartData = {
-                    labels: ["2023", "2024", "2025"],
-                    datasets: [
-                        {
-                            label: "Rata-Rata Nilai",
-                            backgroundColor: ["#5C6BC0", "#42A5F5", "#26C6DA"],
-                            data: [3.45, 3.52, 3.48],
-                            borderRadius: 6,
-                            barThickness: 40,
-                        },
-                    ],
-                };
-            } catch (error) {
-                console.error("Rata Nilai Error:", error);
-                this.errorRataNilai = error.message;
-            } finally {
-                this.isLoadingRataNilai = false;
-            }
-        },
-
-        async fetchTrenIPData() {
-            this.isLoadingTrenIP = true;
-            this.errorTrenIP = null;
-            try {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                this.trenIPChartData = {
-                    labels: ["Semester 1", "Semester 2", "Semester 3", "Semester 4", "Semester 5"],
-                    datasets: [
-                        {
-                            label: "IP Rata-Rata",
-                            backgroundColor: "#FFA726",
-                            data: [3.2, 3.3, 3.4, 3.35, 3.5],
-                            borderRadius: 6,
-                            barThickness: 30,
-                        },
-                    ],
-                };
-            } catch (error) {
-                console.error("Tren IP Error:", error);
-                this.errorTrenIP = error.message;
-            } finally {
-                this.isLoadingTrenIP = false;
-            }
-        },
+        // Method fetchRataNilaiData dihapus
+        // Method fetchTrenIPData dihapus
 
         normalizeData(responseData) {
             if (Array.isArray(responseData)) return responseData;
