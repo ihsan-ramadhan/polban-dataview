@@ -1,14 +1,35 @@
 <template>
-    <div class="home-page">
+    <div class="home-page" ref="pageContainer">
         <div class="welcome-banner">
-            <h1 class="banner-title">Selamat Datang di Polban Dataverse</h1>
-            <p class="banner-text">
-                Polban Dataverse adalah portal visualisasi data terintegrasi
-                yang menyajikan cerita kampus dalam angka. Jelajahi statistik
-                akademik dan demografi Politeknik Negeri Bandung secara
-                interaktif, transparan, dan informatif untuk mendukung
-                pengambilan keputusan berbasis data.
-            </p>
+            <div class="banner-content">
+                <h1 class="banner-title">Selamat Datang di Polban Dataverse</h1>
+                <p class="banner-text">
+                    Polban Dataverse adalah portal visualisasi data terintegrasi
+                    yang menyajikan cerita kampus dalam angka. Jelajahi statistik
+                    akademik dan demografi Politeknik Negeri Bandung secara
+                    interaktif.
+                </p>
+            </div>
+            <div class="banner-action">
+                <button 
+                    class="btn-export-all" 
+                    @click="downloadOnePageReport" 
+                    :disabled="isGeneratingPdf"
+                    data-html2canvas-ignore="true"
+                >
+                    <span v-if="isGeneratingPdf">Memproses PDF...</span>
+                    <span v-else style="display: flex; align-items: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Download Laporan (PDF)
+                    </span>
+                </button>
+            </div>
         </div>
 
         <div class="stats-grid">
@@ -37,8 +58,7 @@
         </div>
 
         <div id="target-chart-section" class="charts-grid">
-            <!-- Baris 1 Kiri: Jenis Kelamin (Kecil) -->
-            <div id="chart-jenis-kelamin" class="chart-card chart-small-width">
+            <div id="chart-jenis-kelamin" class="chart-card chart-small-width" ref="chartCardGender">
                 <div class="card-header">
                     <h2 class="chart-title">Jenis Kelamin</h2>
                     <p class="chart-subtitle">
@@ -60,10 +80,15 @@
                         :chart-data="genderChartData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingGender && genderChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardGender" 
+                        file-name="PieChart-Gender" 
+                    />
+                </div>
             </div>
 
-            <!-- Baris 1 Tengah-Kanan: Asal SLTA (Besar, span 2 kolom) -->
-            <div id="chart-asal-slta" class="chart-card span-col-2">
+            <div id="chart-asal-slta" class="chart-card span-col-2" ref="chartCardSLTA">
                 <div class="card-header">
                     <h2 class="chart-title">Asal SLTA</h2>
                     <p class="chart-subtitle">Asal Jenis Sekolah</p>
@@ -83,10 +108,15 @@
                         :chart-data="sltaChartData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingSLTA && sltaChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardSLTA" 
+                        file-name="BarChart-SLTA" 
+                    />
+                </div>
             </div>
 
-            <!-- Baris 2 Kiri: Agama -->
-            <div id="chart-agama" class="chart-card">
+            <div id="chart-agama" class="chart-card" ref="chartCardAgama">
                 <div class="card-header">
                     <h2 class="chart-title">Agama</h2>
                     <p class="chart-subtitle">Statistik Agama Mahasiswa</p>
@@ -106,10 +136,15 @@
                         :chart-data="agamaChartData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingAgama && agamaChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardAgama" 
+                        file-name="BarChart-Agama" 
+                    />
+                </div>
             </div>
 
-            <!-- Baris 2-3 Kanan: Rasio (Span 2 rows vertikal) -->
-            <div class="chart-card span-row-2 span-col-2">
+            <div id="chart-rasio" class="chart-card span-row-2 span-col-2" ref="chartCardRasio">
                 <div class="card-header">
                     <h2 class="chart-title">Rasio</h2>
                     <p class="chart-subtitle">
@@ -131,10 +166,15 @@
                         :chart-data="dosenChartData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingDosen && dosenChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardRasio" 
+                        file-name="PieChart-RasioDosen" 
+                    />
+                </div>
             </div>
 
-            <!-- Baris 3 Kiri: Jalur Masuk -->
-            <div id="chart-jalur-masuk" class="chart-card">
+            <div id="chart-jalur-masuk" class="chart-card" ref="chartCardTipe">
                 <div class="card-header">
                     <h2 class="chart-title">Jalur Masuk</h2>
                     <p class="chart-subtitle">Tipe Jalur Masuk Mahasiswa</p>
@@ -154,10 +194,15 @@
                         :chart-data="tipeChartData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingTipe && tipeChartData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardTipe" 
+                        file-name="BarChart-JalurMasuk" 
+                    />
+                </div>
             </div>
 
-            <!-- Baris 4: Peta Sebaran Mahasiswa (Full Width) -->
-            <div id="chart-domisili" class="chart-card span-full">
+            <div id="chart-domisili" class="chart-card span-full" ref="chartCardDomisili">
                 <div class="card-header">
                     <h2 class="chart-title">Persebaran Mahasiswa</h2>
                     <p class="chart-subtitle">
@@ -185,6 +230,12 @@
                         :map-data="domisiliData"
                     />
                 </div>
+                <div class="download-action-area" v-if="!isLoadingDomisili && domisiliData">
+                    <ChartDownloadButton 
+                        :target-element="$refs.chartCardDomisili" 
+                        file-name="Map-Domisili" 
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -195,9 +246,14 @@
 import BasePieChart from "../components/Charts/BasePieChart.vue";
 import BaseBarChart from "../components/Charts/BaseBarChart.vue";
 import BaseMap from "../components/Charts/BaseMap.vue";
+// Import komponen Download
+import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
+
+// Import untuk PDF
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 // --- KONFIGURASI PORT ---
-// Pastikan ini sesuai dengan port mock server Anda (6767)
 const API_BASE_URL = "http://localhost:3000";
 
 export default {
@@ -206,9 +262,12 @@ export default {
         BasePieChart,
         BaseBarChart,
         BaseMap,
+        ChartDownloadButton, // Register
     },
     data() {
         return {
+            isGeneratingPdf: false,
+
             // --- DATA KARTU STATISTIK ---
             statCards: [
                 {
@@ -296,6 +355,50 @@ export default {
             const element = document.getElementById(chartId);
             if (element) {
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        },
+
+        // --- EXPORT PDF (One Page) ---
+        async downloadOnePageReport() {
+            this.isGeneratingPdf = true;
+            try {
+                const elementToCapture = this.$refs.pageContainer;
+                const canvas = await html2canvas(elementToCapture, {
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    ignoreElements: (element) => {
+                        return element.hasAttribute('data-html2canvas-ignore');
+                    }
+                });
+
+                const doc = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = doc.internal.pageSize.getHeight();
+                
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const margin = 10;
+                const usableWidth = pdfWidth - (margin * 2);
+                const usableHeight = pdfHeight - (margin * 2);
+
+                const widthRatio = usableWidth / imgWidth;
+                const heightRatio = usableHeight / imgHeight;
+                const scaleFactor = Math.min(widthRatio, heightRatio);
+
+                const finalWidth = imgWidth * scaleFactor;
+                const finalHeight = imgHeight * scaleFactor;
+                const xPos = (pdfWidth - finalWidth) / 2;
+                const yPos = (pdfHeight - finalHeight) / 2;
+
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
+                doc.save(`Laporan-Ringkasan-Polban-${Date.now()}.pdf`);
+            } catch (err) {
+                console.error("Gagal export PDF:", err);
+                alert("Gagal membuat PDF.");
+            } finally {
+                this.isGeneratingPdf = false;
             }
         },
 
@@ -489,8 +592,6 @@ export default {
                     throw new Error(`Server Error: ${response.status}`);
                 const rawData = this.normalizeData(await response.json());
 
-                console.log("Tipe Data:", rawData);
-
                 if (!rawData || rawData.length === 0) {
                     throw new Error("Data jalur masuk kosong");
                 }
@@ -557,6 +658,18 @@ export default {
     border-radius: 12px;
     margin-bottom: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    /* Tambahan Layout Flex untuk Tombol */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.banner-content {
+    flex: 1;
+    min-width: 300px;
 }
 
 .banner-title {
@@ -570,6 +683,34 @@ export default {
     line-height: 1.6;
     opacity: 0.9;
     max-width: 100%;
+}
+
+/* Style Tombol PDF Utama */
+.btn-export-all {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.15); /* Transparan putih */
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: var(--radius-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.btn-export-all:hover { 
+    background-color: var(--color-white); 
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn-export-all:disabled { 
+    background-color: rgba(255, 255, 255, 0.1); 
+    cursor: not-allowed; 
+    transform: none; 
 }
 
 /* --- STATS GRID --- */
@@ -667,6 +808,7 @@ export default {
     flex-direction: column;
     width: 100%;
     border: 1px solid var(--border-color);
+    position: relative; /* Context for absolute positioning if needed */
 }
 
 .chart-title {
@@ -696,6 +838,13 @@ export default {
     border: 1px solid var(--color-gray-200);
 }
 
+/* --- DOWNLOAD ACTION AREA (Sama dengan Akademik) --- */
+.download-action-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
 /* --- LOADING & ERROR STATES --- */
 .state-container {
     display: flex;
@@ -704,7 +853,7 @@ export default {
     justify-content: center;
     height: 100%;
     width: 100%;
-    color: var (--text-primary);
+    color: var(--text-primary);
     font-size: 0.9rem;
     text-align: center;
 }
@@ -778,9 +927,15 @@ export default {
     }
     .welcome-banner {
         padding: 1.5rem;
+        flex-direction: column; /* Stack vertikal di mobile */
+        gap: 1rem;
     }
     .banner-title {
         font-size: 1.5rem;
+    }
+    .btn-export-all {
+        width: 100%;
+        justify-content: center;
     }
 }
 </style>
