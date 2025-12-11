@@ -20,6 +20,7 @@
     --color-gray-900: #0f172a;
     --color-banner: var(--color-primary);
     --color-box: var(--color-primary);
+    --color-text-chart: var(--text-tertiary);
 
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -63,6 +64,7 @@
     --color-secondary-dark: #de8836;
     --color-banner: #1e293b;
     --color-box: var(--color-secondary);
+    --color-text-chart: var(--color-white);
 
     --bg-primary: #0f172a;
     --bg-secondary: #1e293b;
