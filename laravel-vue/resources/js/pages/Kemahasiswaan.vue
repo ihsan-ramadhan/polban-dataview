@@ -193,8 +193,6 @@ import ErrorState from "../components/Shared/ErrorState.vue";
 import EmptyState from "../components/Shared/EmptyState.vue";
 import PdfReportButton from "../components/Shared/PdfReportButton.vue";
 
-const API_BASE_URL = "http://localhost:3000";
-
 export default {
     name: "Kemahasiswaan",
     components: {
@@ -325,10 +323,18 @@ export default {
                 
                 if (!this.filters.gender.angkatan) rawData = this.aggregateData(rawData, 'jenis');
 
+                const labels = rawData.map(item => item.jenis);
+                const colors = labels.map(label => {
+                    const l = String(label).toLowerCase();
+                    if (l.includes('laki') || l.includes('pria') || l === 'l') return "#42A5F5";
+                    if (l.includes('perempuan') || l.includes('wanita') || l === 'p') return "#EC407A";
+                    return "#9E9E9E";
+                });
+
                 this.genderChartData = {
-                    labels: rawData.map(item => item.jenis),
+                    labels: labels,
                     datasets: [{
-                        backgroundColor: ["#42A5F5", "#EC407A"],
+                        backgroundColor: colors,
                         data: rawData.map(item => item.total),
                     }],
                 };

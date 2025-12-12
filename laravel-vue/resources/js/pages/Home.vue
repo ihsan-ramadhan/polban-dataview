@@ -165,8 +165,6 @@ import ErrorState from "../components/Shared/ErrorState.vue";
 import EmptyState from "../components/Shared/EmptyState.vue";
 import PdfReportButton from "../components/Shared/PdfReportButton.vue";
 
-const API_BASE_URL = "http://localhost:3000";
-
 export default {
     name: "Home",
     components: {
@@ -297,10 +295,17 @@ export default {
                 const rawData = this.normalizeData(await response.json());
                 const processedData = this.processChartData(rawData);
 
+                const colors = processedData.labels.map(label => {
+                    const l = String(label).toLowerCase();
+                    if (l.includes('laki') || l.includes('pria') || l === 'l') return "#42A5F5";
+                    if (l.includes('perempuan') || l.includes('wanita') || l === 'p') return "#EC407A";
+                    return "#9E9E9E";
+                });
+
                 this.genderChartData = {
                     labels: processedData.labels,
                     datasets: [{
-                        backgroundColor: ["#42A5F5", "#FF6384"],
+                        backgroundColor: colors,
                         data: processedData.values,
                         borderWidth: 1
                     }]

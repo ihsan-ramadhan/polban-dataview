@@ -73,8 +73,6 @@ import ErrorState from "../components/Shared/ErrorState.vue";
 import EmptyState from "../components/Shared/EmptyState.vue";
 import PdfReportButton from "../components/Shared/PdfReportButton.vue";
 
-const API_BASE_URL = "http://localhost:3000";
-
 export default {
     name: "Akademik",
     components: {
