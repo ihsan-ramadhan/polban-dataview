@@ -112,7 +112,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-primary, #007bff);
+  background-color: var(--color-banner, #007bff);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -132,7 +132,7 @@ export default {
 }
 
 .btn-export-pdf:hover {
-  background-color: var(--color-primary-dark, #0056b3);
+  background-color: var(--color-button-hover, #0056b3);
   transform: translateY(-1px);
 }
 

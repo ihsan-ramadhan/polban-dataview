@@ -21,6 +21,7 @@
     --color-banner: var(--color-primary);
     --color-box: var(--color-primary);
     --color-text-chart: var(--text-tertiary);
+    --color-button-hover: var(--color-primary-dark);
 
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -65,6 +66,7 @@
     --color-banner: #1e293b;
     --color-box: var(--color-secondary);
     --color-text-chart: var(--color-white);
+    --color-button-hover: var(--hover-bg);
 
     --bg-primary: #0f172a;
     --bg-secondary: #1e293b;

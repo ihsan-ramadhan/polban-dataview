@@ -8,24 +8,13 @@
                         Visualisasi data karakteristik mahasiswa Jurusan Teknik Komputer dan Informatika.
                     </p>
                 </div>
-                <button 
-                    class="btn-export-all" 
-                    @click="downloadOnePageReport" 
-                    :disabled="isGeneratingPdf"
-                    data-html2canvas-ignore="true"
-                >
-                    <span v-if="isGeneratingPdf">Memproses PDF...</span>
-                    <span v-else style="display: flex; align-items: center;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10 9 9 9 8 9"/>
-                        </svg>
-                        Download Laporan (PDF)
-                    </span>
-                </button>
+                
+                <PdfReportButton 
+                    :target-element="$refs.pageContainer"
+                    file-name="Laporan-Kemahasiswaan"
+                    button-text="Download Laporan (PDF)"
+                    :disabled="isLoadingAny"
+                />
             </div>
         </div>
 
@@ -202,9 +191,7 @@ import BasePieChart from "../components/Charts/BasePieChart.vue";
 import ChartDownloadButton from "../components/Shared/ChartDownloadButton.vue";
 import ErrorState from "../components/Shared/ErrorState.vue";
 import EmptyState from "../components/Shared/EmptyState.vue";
-
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import PdfReportButton from "../components/Shared/PdfReportButton.vue";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -216,6 +203,7 @@ export default {
         ChartDownloadButton,
         ErrorState,
         EmptyState,
+        PdfReportButton,
     },
     data() {
         return {
@@ -228,7 +216,7 @@ export default {
 
             // Filter states
             filters: {
-                jumlah: { angkatan: "" }, // Biasanya tidak difilter per angkatan karena menampilkan tren
+                jumlah: { angkatan: "" }, 
                 gender: { angkatan: "" },
                 agama: { angkatan: "" },
                 slta: { angkatan: "" },
@@ -250,10 +238,16 @@ export default {
             sltaChartData: null,
             isLoadingSLTA: true,
             errorSLTA: null,
-
-            // PDF state
-            isGeneratingPdf: false,
         };
+    },
+    computed: {
+        // Disable tombol jika ada salah satu chart yang masih loading
+        isLoadingAny() {
+            return this.isLoadingJumlah || 
+                   this.isLoadingGender || 
+                   this.isLoadingAgama || 
+                   this.isLoadingSLTA;
+        }
     },
     mounted() {
         this.fetchAllData();
@@ -275,12 +269,10 @@ export default {
         // Helper untuk handle dropdown
         selectFilter(type, year) {
             this.filters[type].angkatan = year;
-            // Hide dropdown
             if (type === 'gender') this.showGenderDropdown = false;
             if (type === 'agama') this.showAgamaDropdown = false;
             if (type === 'slta') this.showSLTADropdown = false;
             
-            // Refetch data
             if (type === 'gender') this.fetchGenderData();
             if (type === 'agama') this.fetchAgamaData();
             if (type === 'slta') this.fetchSLTAData();
@@ -298,7 +290,6 @@ export default {
                 if (!response.ok) throw new Error("Gagal mengambil data");
                 let rawData = this.normalizeData(await response.json());
                 
-                // Aggregate & Sort
                 rawData = this.aggregateData(rawData, 'angkatan');
                 const targetYears = [2023, 2024, 2025];
                 rawData = rawData.filter(item => targetYears.includes(Number(item.angkatan)));
@@ -337,7 +328,7 @@ export default {
                 this.genderChartData = {
                     labels: rawData.map(item => item.jenis),
                     datasets: [{
-                        backgroundColor: ["#42A5F5", "#EC407A"], // Biru Laki, Pink Perempuan
+                        backgroundColor: ["#42A5F5", "#EC407A"],
                         data: rawData.map(item => item.total),
                     }],
                 };
@@ -426,47 +417,6 @@ export default {
             });
             return Array.from(map.values());
         },
-
-        // --- PDF GENERATION (One Page Scaled) ---
-        async downloadOnePageReport() {
-            this.isGeneratingPdf = true;
-            try {
-                const elementToCapture = this.$refs.pageContainer;
-                const canvas = await html2canvas(elementToCapture, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    ignoreElements: (element) => element.hasAttribute('data-html2canvas-ignore')
-                });
-
-                const doc = new jsPDF('l', 'mm', 'a4');
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = doc.internal.pageSize.getHeight();
-                
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const margin = 10;
-                
-                const usableWidth = pdfWidth - (margin * 2);
-                const usableHeight = pdfHeight - (margin * 2);
-                
-                const scaleFactor = Math.min(usableWidth / imgWidth, usableHeight / imgHeight);
-                const finalWidth = imgWidth * scaleFactor;
-                const finalHeight = imgHeight * scaleFactor;
-                
-                const xPos = (pdfWidth - finalWidth) / 2;
-                const yPos = (pdfHeight - finalHeight) / 2;
-
-                const imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
-                doc.save(`Laporan-Kemahasiswaan-${Date.now()}.pdf`);
-            } catch (err) {
-                console.error("PDF Error:", err);
-                alert("Gagal membuat PDF.");
-            } finally {
-                this.isGeneratingPdf = false;
-            }
-        }
     },
 };
 </script>
@@ -493,25 +443,6 @@ export default {
     gap: 1rem;
 }
 
-/* Tombol PDF Utama (Sama persis dengan Akademik) */
-.btn-export-all {
-  display: flex;
-  align-items: center;
-  background-color: var(--color-banner);
-  color: var(--color-white);
-  border: 1px solid var(--color-banner);
-  padding: 10px 20px;
-  border-radius: var(--radius-xl);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  white-space: nowrap;
-}
-.btn-export-all:hover { background-color: var(--color-primary-hover); transform: translateY(-1px); }
-.btn-export-all:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-
 /* Grid Layout */
 .charts-grid {
     display: grid;
@@ -531,7 +462,7 @@ export default {
     width: 100%;
     min-width: 0;
     border: 1px solid var(--border-color);
-    position: relative; /* Context for absolute filters */
+    position: relative;
 }
 
 .card-header {
@@ -553,12 +484,12 @@ export default {
 .chart-container {
     position: relative;
     width: 100%;
-    height: 300px; /* Tinggi seragam untuk animasi yang lebih baik */
+    height: 300px;
     min-height: 300px;
     overflow: hidden;
 }
 
-/* Filters & Dropdown Styling (Sama persis dengan Akademik) */
+/* Filters & Dropdown Styling */
 .chart-filters {
     position: absolute;
     top: 1.5rem;
@@ -618,8 +549,6 @@ export default {
     text-align: center;
 }
 
-
-
 .loader-spinner {
     width: 20px;
     height: 20px;
@@ -644,7 +573,6 @@ export default {
 
 @media (max-width: 576px) {
     .header-content { flex-direction: column; }
-    .btn-export-all { width: 100%; justify-content: center; }
     .chart-container { height: 250px; min-height: 250px; }
     .chart-filters { position: static; margin-bottom: 1rem; }
     .filter-select-styled { width: 100%; }
