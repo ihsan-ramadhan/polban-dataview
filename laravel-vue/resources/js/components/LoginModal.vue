@@ -108,8 +108,8 @@ export default {
       this.isLoading = true;
 
       try {
-        // Kirim request ke polban-datahub API
-        const response = await axios.post('http://localhost:8000/api/login', {
+        // Kirim request ke polban-datacore API
+        const response = await axios.post('http://localhost:3000/api/auth/login', {
           email: this.email,
           password: this.password
         });
