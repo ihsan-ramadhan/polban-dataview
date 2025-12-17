@@ -63,7 +63,7 @@ export default {
         },
         async handleLogout() {
             try {
-                await fetch("http://localhost:3000/api/auth/logout", {
+                await fetch(`${API_BASE_URL}/api/auth/logout`, {
                     method: "POST",
                     credentials: "include", // Sertakan cookie sesi
                 });
